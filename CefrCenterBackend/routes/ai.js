@@ -1,0 +1,125 @@
+import express from "express";
+import dotenv from "dotenv";
+import { callGroq } from "../services/groqService.js";
+
+dotenv.config();
+const router = express.Router();
+
+const MODEL = "llama-3.3-70b-versatile";
+const WRITING_LIMITS = {
+  "1.1": 15,
+  "1.2": 20,
+  "2":   40
+};
+
+router.post("/writing", async (req, res) => {
+  try {
+    const { text, partNum, prompt: taskPrompt } = req.body;
+    if (!text || text.trim().length < 10) return res.status(400).json({ error: "Response too short." });
+
+    const limit = WRITING_LIMITS[partNum] || 40;
+
+    const aiSystemPrompt = `You are a BRUTALLY HONEST SENIOR IELTS/CEFR EXAMINER.
+    Your mission: Destroy inflated scores. Be SHAVQATSIZ (merciless).
+    
+    SCORING TABLE (Total Max: ${limit}):
+    - 0-25% (A1/A2): Basic vocabulary ('good', 'nice'), simple sentences, frequent basic grammar errors ('I go' instead of 'I went').
+    - 26-50% (B1): Understandable but repetitive, some attempts at complex sentences, frequent errors.
+    - 51-75% (B2): Good range, few errors, clear logic.
+    - 76-90% (C1): Sophisticated, academic vocabulary, rare errors.
+    - 91-100% (C2): Native-level mastery.
+
+    STRICT PENALTY RULES:
+    1. If the student uses "I go" for a past event, or "It was nice trip" (missing article), the Grammar score MUST be below 2/3.75.
+    2. If there are > 4 basic errors, the Total Band CANNOT exceed 5.5.
+    3. If the vocabulary is childish/basic, Lexical score MUST be below 1.5/3.75.
+    4. Task Achievement: If the length is close to the minimum but the content is hollow, penalize.
+    
+    CRITICAL: For text like "I go to Samarkand last week. It was nice trip.", the result MUST be strictly Band 2.0 - 3.0 (which translates to very low scores like 0.5/3.75 per criteria). NEVER give anything higher than B1 for basic grammar.
+    You MUST output extremely low scores for basic errors. If you detect basic A1/A2 errors in a text, ALL four criteria should be scored lower than 1.5 out of 3.75.
+    
+    Respond strictly in JSON:
+    {
+      "scores": { "task": number, "cohesion": number, "lexical": number, "grammar": number },
+      "evaluation": "Naked truth about the student's level",
+      "feedback": "Brutal feedback + how to stop being basic",
+      "errors": [
+        { "original": "...", "correction": "...", "type": "Grammar/Spelling/Vocabulary/Punctuation", "explanation": "..." }
+      ],
+      "modelAnswer": "..."
+    }`;
+
+    const data = await callGroq({
+      model: MODEL,
+      messages: [
+        { role: "system", content: aiSystemPrompt },
+        { role: "user", content: `Task: ${taskPrompt}\nStudent Text: ${text}` }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.1
+    });
+
+    let content = data.choices[0].message.content;
+    content = content.replace(/```json/g, "").replace(/```/g, "").trim();
+    let result;
+    try {
+      result = JSON.parse(content);
+    } catch(e) {
+      console.error("JSON Parse Error:", e, "Content was:", content);
+      return res.status(500).json({ error: "AI Response format error" });
+    }
+    res.json(result);
+  } catch (err) {
+    console.error("AI Writing Route Error:", err);
+    res.status(500).json({ error: "AI Error", details: err.message });
+  }
+});
+
+router.post("/speaking", async (req, res) => {
+  try {
+    const { audioExists, transcript, partNum, prompt: taskPrompt } = req.body;
+    if (!transcript) return res.json({ error: "No transcript" });
+
+    const aiSystemPrompt = `You are a SENIOR SPEAKING EXAMINER. Evaluate the student's speaking with HIGH RIGOR.
+    
+    SCORING RULES:
+    1. Fluency & Coherence: Penalize for hesitations, repetition, and poor logical flow.
+    2. Lexical Resource: Cap at B1/A2 if only simple words are used.
+    3. Grammatical Range: Deduct for every spoken error.
+    4. Pronunciation: Estimate based on transcript clarity.
+    
+    Respond strictly in JSON:
+    {
+      "scores": { "fluency": number, "cohesion": number, "lexical": number, "grammar": number },
+      "evaluation": "Professional evaluation",
+      "feedback": "Honest advice",
+      "errors": []
+    }`;
+
+    const data = await callGroq({
+      model: MODEL,
+      messages: [
+        { role: "system", content: aiSystemPrompt },
+        { role: "user", content: `Topic: ${taskPrompt}\nTranscript: ${transcript}` }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.2
+    });
+
+    let content = data.choices[0].message.content;
+    content = content.replace(/```json/g, "").replace(/```/g, "").trim();
+    let result;
+    try {
+      result = JSON.parse(content);
+    } catch(e) {
+      console.error("JSON Parse Error:", e, "Content was:", content);
+      return res.status(500).json({ error: "AI Response format error" });
+    }
+    res.json(result);
+  } catch (err) {
+    console.error("AI Speaking Route Error:", err);
+    res.status(500).json({ error: "AI Error", details: err.message });
+  }
+});
+
+export default router;

@@ -1,0 +1,547 @@
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Moon,
+  Sun,
+  BookOpen,
+  Headphones,
+  PenTool,
+  Menu,
+  X,
+  ArrowRight,
+  Shield,
+  Mail,
+  MapPin,
+  User,
+  Code,
+  Send,
+  Zap,
+  Award,
+  Globe,
+  Briefcase,
+  GraduationCap,
+  Heart,
+  Phone,
+  Mic,
+} from "lucide-react";
+import { FaTelegramPlane } from "react-icons/fa";
+import "./About.css";
+
+const BOT_TOKEN = "8968436498:AAEMGT-rJ2tRR1-2bWDFi1OTqkgQ_Dhpm3o";
+const CHAT_ID = "7747756904";
+
+export default function About() {
+  const navigate = useNavigate();
+  const canvasRef = useRef(null);
+  const foundersRef = useRef(null);
+  const contactRef = useRef(null);
+
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
+
+  // Dark mode kept — no forced light override
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    let w = (canvas.width = window.innerWidth);
+    let h = (canvas.height = window.innerHeight);
+    const particles = [];
+
+    const resize = () => {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    };
+    window.addEventListener("resize", resize);
+
+    const move = (e) => {
+      for (let i = 0; i < 3; i++) {
+        particles.push({
+          x: e.clientX,
+          y: e.clientY,
+          size: Math.random() * 2 + 1,
+          speedX: (Math.random() - 0.5) * 2,
+          speedY: (Math.random() - 0.5) * 2,
+          life: 50,
+        });
+      }
+    };
+    window.addEventListener("mousemove", move);
+
+    const animate = () => {
+      ctx.clearRect(0, 0, w, h);
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.speedX;
+        p.y += p.speedY;
+        p.life--;
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(99,102,241,0.3)";
+        ctx.fill();
+      }
+      requestAnimationFrame(animate);
+    };
+    animate();
+
+    return () => {
+      window.removeEventListener("resize", resize);
+      window.removeEventListener("mousemove", move);
+    };
+  }, []);
+
+  const go = () => {
+    navigate("/login");
+    setMenuOpen(false);
+  };
+
+  const goPage = (path) => {
+    navigate(path);
+    setMenuOpen(false);
+  };
+
+  const scrollTo = (ref) => {
+    setMenuOpen(false);
+    setTimeout(() => {
+      ref.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
+
+  const handleSend = async () => {
+    if (!form.name || !form.email || !form.message) {
+      setError("Please fill in all fields.");
+      return;
+    }
+    setSending(true);
+    setError("");
+    const text =
+      `📩 *New Message — Cefr Center*\n\n` +
+      `👤 *Name:* ${form.name}\n` +
+      `📧 *Email:* ${form.email}\n` +
+      `💬 *Message:* ${form.message}`;
+    try {
+      const res = await fetch(
+        `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: CHAT_ID,
+            text,
+            parse_mode: "Markdown",
+          }),
+        }
+      );
+      const data = await res.json();
+      if (data.ok) {
+        setSent(true);
+        setForm({ name: "", email: "", message: "" });
+      } else {
+        setError("Error sending message.");
+      }
+    } catch {
+      setError("An internet error occurred.");
+    }
+    setSending(false);
+  };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("reveal-visible");
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    const elements = document.querySelectorAll(".reveal");
+    elements.forEach((el) => observer.observe(el));
+
+    return () => elements.forEach((el) => observer.unobserve(el));
+  }, []);
+
+  function AnimatedCounter({ end, duration = 2000, suffix = "" }) {
+    const [count, setCount] = useState(0);
+    const countRef = useRef(null);
+
+    useEffect(() => {
+      const observer = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting) {
+          let start = 0;
+          const increment = end / (duration / 16);
+          const timer = setInterval(() => {
+            start += increment;
+            if (start >= end) {
+              setCount(end);
+              clearInterval(timer);
+            } else {
+              setCount(Math.floor(start));
+            }
+          }, 16);
+          return () => clearInterval(timer);
+        }
+      }, { threshold: 0.1 });
+
+      if (countRef.current) observer.observe(countRef.current);
+      return () => observer.disconnect();
+    }, [end, duration]);
+
+    return <span ref={countRef}>{count}{suffix}</span>;
+  }
+
+  return (
+    <div className="about-page">
+      <canvas ref={canvasRef} className="cursor-canvas"></canvas>
+
+      {/* NAVBAR */}
+      <nav className="navbar">
+        <div className="logo" onClick={() => goPage("/")}>Cefr Center</div>
+
+        <div className="nav-menu">
+          <p onClick={() => scrollTo(foundersRef)}>About</p>
+          <p onClick={() => scrollTo(contactRef)}>Contact</p>
+        </div>
+
+        <div className="nav-right">
+          <button className="start-btn" onClick={go}>
+            Start <ArrowRight size={16} />
+          </button>
+          <button className="menu-btn" onClick={() => setMenuOpen(!menuOpen)}>
+            {menuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
+      </nav>
+
+      {menuOpen && (
+        <div className="mobile-menu">
+          <p onClick={() => scrollTo(foundersRef)}>About</p>
+          <p onClick={() => scrollTo(contactRef)}>Contact</p>
+          <button className="mobile-start-btn" onClick={go}>
+            Start <ArrowRight size={16} />
+          </button>
+        </div>
+      )}
+
+      {/* HERO */}
+      <section className="about-hero">
+        <div className="hero-content">
+          <div className="hero-badge">
+            <Zap size={14} /> Cefr Exam Preparation
+          </div>
+          <h1 style={{ letterSpacing: "-1.5px" }}>
+            Master English with<br /><span>Advanced AI</span>
+          </h1>
+          <p>
+            Your ultimate destination for CEFR & IELTS preparation. Learn faster,
+            speak better, and track your progress with our state-of-the-art platform.
+          </p>
+          <div className="hero-buttons">
+            <button onClick={go} className="btn-red">
+              <Zap size={16} /> Start Free
+            </button>
+            <button onClick={() => scrollTo(foundersRef)} className="btn-outline">
+              <User size={16} /> Meet the Team
+            </button>
+          </div>
+          <div className="hero-stats reveal">
+            <div className="stat-box">
+              <h3><AnimatedCounter end={500} suffix="+" /></h3>
+              <p><GraduationCap size={13} /> Students</p>
+            </div>
+            <div className="stat-box">
+              <h3>A1–C2</h3>
+              <p><Award size={13} /> All Levels</p>
+            </div>
+            <div className="stat-box">
+              <h3><AnimatedCounter end={4} /></h3>
+              <p><BookOpen size={13} /> Skills</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section className="features-section reveal">
+        <div className="section-label"><Zap size={14} /> What We Offer</div>
+        <h2>Everything You Need</h2>
+        <p className="section-sub">
+          Comprehensive tools designed to help you pass CEFR exams with top scores.
+        </p>
+        <div className="features-grid features-grid-4">
+          <div className="feature-card">
+            <div className="feature-icon"><BookOpen size={26} /></div>
+            <h3>Reading</h3>
+            <p>
+              Practice with authentic CEFR-level reading passages. Improve
+              comprehension, vocabulary, and speed across all 6 levels.
+            </p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon"><Headphones size={26} /></div>
+            <h3>Listening</h3>
+            <p>
+              Train with native speaker recordings and accents. Build your
+              listening accuracy with timed exercises and instant scoring.
+            </p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon"><PenTool size={26} /></div>
+            <h3>Writing</h3>
+            <p>
+              Submit essays and get AI-powered feedback on grammar, structure,
+              coherence, and lexical range — just like a real examiner.
+            </p>
+          </div>
+          <div className="feature-card speaking-card">
+            <div className="feature-icon speaking-icon">
+              <Mic size={26} />
+              <span className="speaking-pulse"></span>
+            </div>
+            <h3>Speaking</h3>
+            <p>
+              Record your answers and receive instant AI feedback on
+              pronunciation, fluency, and coherence. Practice real CEFR
+              speaking tasks at any level.
+            </p>
+            <div className="speaking-tags">
+              <span className="stag">AI Feedback</span>
+              <span className="stag">Pronunciation</span>
+              <span className="stag">Fluency</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FOUNDERS */}
+      <section className="team-section reveal" ref={foundersRef} id="founders">
+        <div className="section-label"> Biz haqimizda</div>
+        <h2>Asoschi bilan tanishing</h2>
+        <p className="section-sub">
+          CEFR tayyorlashni qulay, samarali va zamonaviy qiluvchi yosh web
+          dasturchi hamjamiyati.
+        </p>
+
+        <div className="dev-grid premium-dev-grid">
+          <div className="dev-card premium-dev-card">
+            <div className="premium-card-bg-glow"></div>
+            <div className="dev-card-top">
+              <div className="premium-avatar-container">
+                <img
+                  src="/asatillo.png"
+                  alt="Alisherov Asatillo"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "/xojiakbar.png";
+                  }}
+                  className="premium-avatar"
+                />
+                <span className="premium-pulse-ring"></span>
+              </div>
+              <span className="dev-badge premium-badge">
+                <Code size={12} /> Web Prodigy
+              </span>
+            </div>
+            <h3 className="premium-title">Alisherov Asatillo</h3>
+            <p className="dev-role premium-role">
+              <Code size={14} className="role-icon" /> 11 yoshda Web Dasturchi
+            </p>
+            <p className="dev-bio-text premium-bio">
+              Men <strong>11 yoshda</strong> web dasturchiman. Zamonaviy va tezkor interaktiv saytlar yarataman. React, Node.js va JavaScript bo‘yicha ishlayman va CEFR Center platformasining asosiy modulini yaratdim.
+            </p>
+            <ul className="dev-facts premium-facts">
+              <li><Code size={13} /> React & JavaScript</li>
+              <li><Zap size={13} /> UI/UX Mutaxassisi</li>
+              <li><Briefcase size={13} /> 11 yosh</li>
+              <li><Globe size={13} /> Web Dasturchi</li>
+            </ul>
+            <div className="dev-socials premium-socials">
+              <a
+                href="https://t.me/islombekivich"
+                target="_blank"
+                rel="noreferrer"
+                className="premium-telegram-btn"
+              >
+                <FaTelegramPlane />
+                <span>Telegram orqali bog'lanish</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div className="info-glass-card">
+          <div className="badge">
+            <Shield size={14} /> Secure & Trusted Platform
+          </div>
+          <p>
+            All user data is fully encrypted and protected. We never share your
+            information with third parties.
+          </p>
+        </div>
+      </section>
+
+      {/* CONTACT */}
+      <section className="contact-section reveal" ref={contactRef} id="contact">
+        <div className="section-label"><Send size={14} /> Get in Touch</div>
+        <h2>Contact Us</h2>
+        <p className="section-sub">
+          Have a question or want to learn more? Send us a message — we'll reply
+          as soon as possible via Telegram.
+        </p>
+
+        <div className="contact-wrapper">
+          <div className="contact-form-box">
+            {sent ? (
+              <div className="sent-success">
+                <div className="sent-icon"><Send size={32} /></div>
+                <h3>Message Sent!</h3>
+                <p>Thank you! We'll get back to you shortly.</p>
+                <button onClick={() => setSent(false)} className="btn-red">
+                  <ArrowRight size={15} /> Send Another
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="input-group">
+                  <User size={16} className="input-icon" />
+                  <input
+                    placeholder="Your Name"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  />
+                </div>
+                <div className="input-group">
+                  <Mail size={16} className="input-icon" />
+                  <input
+                    placeholder="Your Email"
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  />
+                </div>
+                <div className="input-group textarea-group">
+                  <PenTool size={16} className="input-icon" />
+                  <textarea
+                    placeholder="Your Message"
+                    value={form.message}
+                    onChange={(e) =>
+                      setForm({ ...form, message: e.target.value })
+                    }
+                  ></textarea>
+                </div>
+                {error && <p className="form-error">{error}</p>}
+                <button
+                  className="btn-red send-btn"
+                  onClick={handleSend}
+                  disabled={sending}
+                >
+                  {sending ? (
+                    <span className="spinner"></span>
+                  ) : (
+                    <><Send size={15} /> Send Message</>
+                  )}
+                </button>
+              </>
+            )}
+          </div>
+
+          <div className="contact-info">
+            <h3>Reach us directly</h3>
+            <div className="contact-item">
+              <Mail size={18} />
+              <div>
+                <span className="ci-label">Email</span>
+                <span className="ci-val">cefrcenter365@gmail.com</span>
+              </div>
+            </div>
+            <div className="contact-item telegram-item">
+              <FaTelegramPlane className="tg-contact-icon" />
+              <div>
+                <span className="ci-label">Telegram</span>
+                <a
+                  href="https://t.me/islombekivich"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="ci-val tg-link"
+                >
+                  @islombekivich
+                </a>
+              </div>
+            </div>
+            <div className="contact-item">
+              <Phone size={18} />
+              <div>
+                <span className="ci-label">Phone</span>
+                <span className="ci-val">+998 95 533 1528</span>
+              </div>
+            </div>
+            <div className="contact-item">
+              <MapPin size={18} />
+              <div>
+                <span className="ci-label">Location</span>
+                <span className="ci-val">Andijan, Uzbekistan</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="footer">
+        <div className="footer-top">
+          <div className="footer-brand">
+            <div className="footer-logo">Cefr Center</div>
+            <p>
+              Professional English exam preparation for A1–C2 levels. Join
+              hundreds of students achieving their goals.
+            </p>
+            <div className="footer-social">
+              <a
+                href="https://t.me/islombekivich"
+                target="_blank"
+                rel="noreferrer"
+                className="footer-tg"
+              >
+                <FaTelegramPlane />
+              </a>
+            </div>
+          </div>
+
+          <div className="footer-links">
+            <h4>Navigation</h4>
+            <p onClick={() => scrollTo(foundersRef)}>About Us</p>
+            <p onClick={() => scrollTo(contactRef)}>Contact</p>
+            <p onClick={go}>Login</p>
+          </div>
+
+          <div className="footer-links">
+            <h4>Platform</h4>
+            <p onClick={go}>Reading Tests</p>
+            <p onClick={go}>Listening Tests</p>
+            <p onClick={go}>Writing Practice</p>
+            <p onClick={go}>Speaking Practice</p>
+          </div>
+
+          <div className="footer-links">
+            <h4>Contact</h4>
+            <p><Mail size={13} style={{ marginRight: 6 }} />cefrcenter365@gmail.com</p>
+            <p><MapPin size={13} style={{ marginRight: 6 }} />Andijan, Uzbekistan</p>
+          </div>
+        </div>
+
+        <div className="footer-bottom">
+          <p>© {new Date().getFullYear()} Cefr Center. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
+  );
+}
