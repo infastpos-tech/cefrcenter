@@ -1,0 +1,1115 @@
+[
+  {
+    "id": "set_kitchen",
+    "category": "kitchen",
+    "categoryLabel": "🍳 Kitchen",
+    "fromLang": "en",
+    "fromLangLabel": "English",
+    "toLang": "uz_ru",
+    "toLangLabel": "Uzbek / Russian",
+    "words": [
+      {
+        "word": "Pot",
+        "translation": "Qozon / Горшок",
+        "uz": "Qozon",
+        "ru": "Горшок",
+        "emoji": "🍲",
+        "sentences": [
+          "The pot is on the stove.",
+          "A large pot of stew."
+        ]
+      },
+      {
+        "word": "Knife",
+        "translation": "Pichoq / Нож",
+        "uz": "Pichoq",
+        "ru": "Нож",
+        "emoji": "🔪",
+        "sentences": [
+          "The knife is very sharp.",
+          "Use a knife to cut the bread."
+        ]
+      },
+      {
+        "word": "Cup",
+        "translation": "Finjon / Чашка",
+        "uz": "Finjon",
+        "ru": "Чашка",
+        "emoji": "☕",
+        "sentences": [
+          "A cup of hot tea.",
+          "The cup is full of water."
+        ]
+      },
+      {
+        "word": "Plate",
+        "translation": "Likopcha / Тарелка",
+        "uz": "Likopcha",
+        "ru": "Тарелка",
+        "emoji": "🍽️",
+        "sentences": [
+          "Put food on the plate.",
+          "A clean white plate."
+        ]
+      },
+      {
+        "word": "Spoon",
+        "translation": "Qoshiq / Ложка",
+        "uz": "Qoshiq",
+        "ru": "Ложка",
+        "emoji": "🥄",
+        "sentences": [
+          "Stir the soup with a spoon.",
+          "Give me a spoon, please."
+        ]
+      },
+      {
+        "word": "Fork",
+        "translation": "Vilka / Вилка",
+        "uz": "Vilka",
+        "ru": "Вилка",
+        "emoji": "🍴",
+        "sentences": [
+          "Use a fork to eat salad.",
+          "The fork is on the table."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "set_travel",
+    "category": "travel",
+    "categoryLabel": "✈️ Travel",
+    "fromLang": "en",
+    "fromLangLabel": "English",
+    "toLang": "uz_ru",
+    "toLangLabel": "Uzbek / Russian",
+    "words": [
+      {
+        "word": "Airport",
+        "translation": "Aeroport / Аэропорт",
+        "uz": "Aeroport",
+        "ru": "Аэропорт",
+        "emoji": "✈️",
+        "sentences": [
+          "We are going to the airport.",
+          "The airport is crowded."
+        ]
+      },
+      {
+        "word": "Ticket",
+        "translation": "Chipta / Билет",
+        "uz": "Chipta",
+        "ru": "Билет",
+        "emoji": "🎫",
+        "sentences": [
+          "Don't forget your ticket.",
+          "I bought a plane ticket."
+        ]
+      },
+      {
+        "word": "Suitcase",
+        "translation": "Chomadon / Чемодан",
+        "uz": "Chomadon",
+        "ru": "Чемодан",
+        "emoji": "🧳",
+        "sentences": [
+          "My suitcase is heavy.",
+          "Pack your suitcase for the trip."
+        ]
+      },
+      {
+        "word": "Passport",
+        "translation": "Pasport / Паспорт",
+        "uz": "Pasport",
+        "ru": "Паспорт",
+        "emoji": "🛂",
+        "sentences": [
+          "Show your passport at the border.",
+          "I need to renew my passport."
+        ]
+      },
+      {
+        "word": "Map",
+        "translation": "Xarita / Карта",
+        "uz": "Xarita",
+        "ru": "Карта",
+        "emoji": "🗺️",
+        "sentences": [
+          "Look at the map to find the way.",
+          "We used a digital map."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "set_technology",
+    "category": "technology",
+    "categoryLabel": "💻 Technology",
+    "fromLang": "en",
+    "fromLangLabel": "English",
+    "toLang": "uz_ru",
+    "toLangLabel": "Uzbek / Russian",
+    "words": [
+      {
+        "word": "Computer",
+        "translation": "Kompyuter / Компьютер",
+        "uz": "Kompyuter",
+        "ru": "Компьютер",
+        "emoji": "💻",
+        "sentences": [
+          "I use my computer for work.",
+          "A fast computer is essential."
+        ]
+      },
+      {
+        "word": "Internet",
+        "translation": "Internet / Интернет",
+        "uz": "Internet",
+        "ru": "Интернет",
+        "emoji": "🌐",
+        "sentences": [
+          "The internet is slow today.",
+          "Search for it on the internet."
+        ]
+      },
+      {
+        "word": "Smartphone",
+        "translation": "Smartfon / Смартфон",
+        "uz": "Smartfon",
+        "ru": "Смартфон",
+        "emoji": "📱",
+        "sentences": [
+          "Check your messages on your smartphone.",
+          "A new smartphone model."
+        ]
+      },
+      {
+        "word": "Software",
+        "translation": "Dasturiy ta'minot / Программное обеспечение",
+        "uz": "Dasturiy ta'minot",
+        "ru": "Программное обеспечение",
+        "emoji": "🖱️",
+        "sentences": [
+          "Install the new software.",
+          "Software development is a great career."
+        ]
+      },
+      {
+        "word": "Website",
+        "translation": "Veb-sayt / Веб-сайт",
+        "uz": "Veb-sayt",
+        "ru": "Веб-сайт",
+        "emoji": "🌍",
+        "sentences": [
+          "Visit our official website.",
+          "The website design is clean."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "set_emotions",
+    "category": "emotions",
+    "categoryLabel": "😊 Emotions",
+    "fromLang": "en",
+    "fromLangLabel": "English",
+    "toLang": "uz_ru",
+    "toLangLabel": "Uzbek / Russian",
+    "words": [
+      {
+        "word": "Happy",
+        "translation": "Baxtli / Счастливый",
+        "uz": "Baxtli",
+        "ru": "Счастливый",
+        "emoji": "😊",
+        "sentences": [
+          "I am so happy today!",
+          "She has a happy smile."
+        ]
+      },
+      {
+        "word": "Sad",
+        "translation": "Xafa / Грустный",
+        "uz": "Xafa",
+        "ru": "Грустный",
+        "emoji": "😢",
+        "sentences": [
+          "Don't be sad, everything is fine.",
+          "A sad movie."
+        ]
+      },
+      {
+        "word": "Angry",
+        "translation": "G'azablangan / Злой",
+        "uz": "G'azablangan",
+        "ru": "Злой",
+        "emoji": "😡",
+        "sentences": [
+          "He is angry about the delay.",
+          "Don't make me angry."
+        ]
+      },
+      {
+        "word": "Surprised",
+        "translation": "Hayron / Удивленный",
+        "uz": "Hayron",
+        "ru": "Удивленный",
+        "emoji": "😲",
+        "sentences": [
+          "I was surprised by the news.",
+          "A surprised look on his face."
+        ]
+      },
+      {
+        "word": "Bored",
+        "translation": "Zerikkan / Скучающий",
+        "uz": "Zerikkan",
+        "ru": "Скучающий",
+        "emoji": "😑",
+        "sentences": [
+          "I am bored with this game.",
+          "The students were bored."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "set_nature",
+    "category": "nature",
+    "categoryLabel": "🌿 Nature",
+    "words": [
+      {
+        "word": "Mountain",
+        "translation": "Tog' / Гора",
+        "uz": "Tog'",
+        "ru": "Гора",
+        "emoji": "⛰️",
+        "sentences": [
+          "The mountain is very high.",
+          "Let's climb the mountain."
+        ]
+      },
+      {
+        "word": "River",
+        "translation": "Daryo / Река",
+        "uz": "Daryo",
+        "ru": "Река",
+        "emoji": "🌊",
+        "sentences": [
+          "The river flows to the sea.",
+          "A clean blue river."
+        ]
+      },
+      {
+        "word": "Forest",
+        "translation": "O'rmon / Лес",
+        "uz": "O'rmon",
+        "ru": "Лес",
+        "emoji": "🌲",
+        "sentences": [
+          "Many trees in the forest.",
+          "The forest is dark."
+        ]
+      },
+      {
+        "word": "Ocean",
+        "translation": "Okean / Океан",
+        "uz": "Okean",
+        "ru": "Океан",
+        "emoji": "🌊",
+        "sentences": [
+          "The ocean is vast.",
+          "I love the sound of the ocean."
+        ]
+      },
+      {
+        "word": "Flower",
+        "translation": "Gul / Цветок",
+        "uz": "Gul",
+        "ru": "Цветок",
+        "emoji": "🌸",
+        "sentences": [
+          "The flower is beautiful.",
+          "A red flower."
+        ]
+      },
+      {
+        "word": "Tree",
+        "translation": "Daraxt / Дерево",
+        "uz": "Daraxt",
+        "ru": "Дерево",
+        "emoji": "🌳",
+        "sentences": [
+          "The tree is old.",
+          "A tall oak tree."
+        ]
+      },
+      {
+        "word": "Sun",
+        "translation": "Quyosh / Солнце",
+        "uz": "Quyosh",
+        "ru": "Солнце",
+        "emoji": "☀️",
+        "sentences": [
+          "The sun is shining.",
+          "A hot summer sun."
+        ]
+      },
+      {
+        "word": "Moon",
+        "translation": "Oy / Луна",
+        "uz": "Oy",
+        "ru": "Луна",
+        "emoji": "🌙",
+        "sentences": [
+          "The moon is bright tonight.",
+          "Full moon in the sky."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "set_education",
+    "category": "education",
+    "categoryLabel": "🎓 Education",
+    "words": [
+      {
+        "word": "Teacher",
+        "translation": "O'qituvchi / Учитель",
+        "uz": "O'qituvchi",
+        "ru": "Учитель",
+        "emoji": "👨‍🏫",
+        "sentences": [
+          "Our teacher is very kind.",
+          "A history teacher."
+        ]
+      },
+      {
+        "word": "Student",
+        "translation": "Talaba / Студент",
+        "uz": "Talaba",
+        "ru": "Студент",
+        "emoji": "🎓",
+        "sentences": [
+          "I am a university student.",
+          "A group of students."
+        ]
+      },
+      {
+        "word": "Book",
+        "translation": "Kitob / Книга",
+        "uz": "Kitob",
+        "ru": "Книга",
+        "emoji": "📖",
+        "sentences": [
+          "Read this book.",
+          "An interesting book."
+        ]
+      },
+      {
+        "word": "Pen",
+        "translation": "Ruchka / Ручка",
+        "uz": "Ruchka",
+        "ru": "Ручка",
+        "emoji": "🖊️",
+        "sentences": [
+          "I need a pen to write.",
+          "A blue ink pen."
+        ]
+      },
+      {
+        "word": "School",
+        "translation": "Maktab / Школа",
+        "uz": "Maktab",
+        "ru": "Школа",
+        "emoji": "🏫",
+        "sentences": [
+          "Children go to school.",
+          "My school is near here."
+        ]
+      },
+      {
+        "word": "Classroom",
+        "translation": "Sinfxona / Класс",
+        "uz": "Sinfxona",
+        "ru": "Класс",
+        "emoji": "🏫",
+        "sentences": [
+          "The classroom is big.",
+          "Sit down in the classroom."
+        ]
+      },
+      {
+        "word": "Exam",
+        "translation": "Imtihon / Экзамен",
+        "uz": "Imtihon",
+        "ru": "Экзамен",
+        "emoji": "📝",
+        "sentences": [
+          "I have an exam tomorrow.",
+          "A difficult math exam."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "set_health",
+    "category": "health",
+    "categoryLabel": "🏥 Health",
+    "words": [
+      {
+        "word": "Doctor",
+        "translation": "Shifokor / Врач",
+        "uz": "Shifokor",
+        "ru": "Врач",
+        "emoji": "👨‍⚕️",
+        "sentences": [
+          "Go to the doctor.",
+          "The doctor gave me medicine."
+        ]
+      },
+      {
+        "word": "Nurse",
+        "translation": "Hamshira / Медсестра",
+        "uz": "Hamshira",
+        "ru": "Медсестра",
+        "emoji": "👩‍⚕️",
+        "sentences": [
+          "The nurse is helpful.",
+          "A kind nurse."
+        ]
+      },
+      {
+        "word": "Hospital",
+        "translation": "Kasalxona / Больница",
+        "uz": "Kasalxona",
+        "ru": "Больница",
+        "emoji": "🏥",
+        "sentences": [
+          "The hospital is large.",
+          "They are in the hospital."
+        ]
+      },
+      {
+        "word": "Medicine",
+        "translation": "Dori / Лекарство",
+        "uz": "Dori",
+        "ru": "Лекарство",
+        "emoji": "💊",
+        "sentences": [
+          "Take your medicine.",
+          "Modern medicine."
+        ]
+      },
+      {
+        "word": "Health",
+        "translation": "Salomatlik / Здоровье",
+        "uz": "Salomatlik",
+        "ru": "Здоровье",
+        "emoji": "💪",
+        "sentences": [
+          "Health is wealth.",
+          "Good health is important."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "set_business",
+    "category": "business",
+    "categoryLabel": "💼 Business",
+    "fromLang": "en",
+    "fromLangLabel": "English",
+    "toLang": "uz_ru",
+    "toLangLabel": "Uzbek / Russian",
+    "words": [
+      {
+        "word": "Company",
+        "translation": "Kompaniya / Компания",
+        "uz": "Kompaniya",
+        "ru": "Компания",
+        "emoji": "🏢",
+        "sentences": [
+          "She works for a large company.",
+          "They started a new company."
+        ]
+      },
+      {
+        "word": "Meeting",
+        "translation": "Uchrashuv / Встреча",
+        "uz": "Uchrashuv",
+        "ru": "Встреча",
+        "emoji": "🤝",
+        "sentences": [
+          "We have a meeting at 10 AM.",
+          "The meeting was productive."
+        ]
+      },
+      {
+        "word": "Market",
+        "translation": "Bozor / Рынок",
+        "uz": "Bozor",
+        "ru": "Рынок",
+        "emoji": "📈",
+        "sentences": [
+          "The financial market is booming.",
+          "They study the market."
+        ]
+      },
+      {
+        "word": "Profit",
+        "translation": "Foyda / Прибыль",
+        "uz": "Foyda",
+        "ru": "Прибыль",
+        "emoji": "💰",
+        "sentences": [
+          "Our profit increased this year.",
+          "No profit without risk."
+        ]
+      },
+      {
+        "word": "Contract",
+        "translation": "Shartnoma / Контракт",
+        "uz": "Shartnoma",
+        "ru": "Контракт",
+        "emoji": "📄",
+        "sentences": [
+          "Sign the contract here.",
+          "A long-term contract."
+        ]
+      },
+      {
+        "word": "Invest",
+        "translation": "Sarmoya kiritish / Инвестировать",
+        "uz": "Sarmoya kiritish",
+        "ru": "Инвестировать",
+        "emoji": "💸",
+        "sentences": [
+          "He invested in real estate.",
+          "It's good to invest early."
+        ]
+      },
+      {
+        "word": "Competitor",
+        "translation": "Raqobatchi / Конкурент",
+        "uz": "Raqobatchi",
+        "ru": "Конкурент",
+        "emoji": "🥊",
+        "sentences": [
+          "They are our main competitor.",
+          "Analyze your competitors."
+        ]
+      },
+      {
+        "word": "Budget",
+        "translation": "Budjet / Бюджет",
+        "uz": "Budjet",
+        "ru": "Бюджет",
+        "emoji": "📊",
+        "sentences": [
+          "We have a tight budget.",
+          "Plan the monthly budget."
+        ]
+      },
+      {
+        "word": "Boss",
+        "translation": "Boshliq / Босс",
+        "uz": "Boshliq",
+        "ru": "Босс",
+        "emoji": "👨‍💼",
+        "sentences": [
+          "My boss is very strict.",
+          "She became the new boss."
+        ]
+      },
+      {
+        "word": "Employee",
+        "translation": "Ishchi / Сотрудник",
+        "uz": "Ishchi",
+        "ru": "Сотрудник",
+        "emoji": "👷",
+        "sentences": [
+          "An honest employee.",
+          "We hired ten new employees."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "set_body",
+    "category": "body",
+    "categoryLabel": "🧍 Human Body",
+    "fromLang": "en",
+    "fromLangLabel": "English",
+    "toLang": "uz_ru",
+    "toLangLabel": "Uzbek / Russian",
+    "words": [
+      {
+        "word": "Head",
+        "translation": "Bosh / Голова",
+        "uz": "Bosh",
+        "ru": "Голова",
+        "emoji": "🗣️",
+        "sentences": [
+          "I have a pain in my head.",
+          "Turn your head right."
+        ]
+      },
+      {
+        "word": "Shoulder",
+        "translation": "Yelka / Плечо",
+        "uz": "Yelka",
+        "ru": "Плечо",
+        "emoji": "🦾",
+        "sentences": [
+          "My shoulder hurts.",
+          "He carried the bag on his shoulder."
+        ]
+      },
+      {
+        "word": "Heart",
+        "translation": "Yurak / Сердце",
+        "uz": "Yurak",
+        "ru": "Сердце",
+        "emoji": "❤️",
+        "sentences": [
+          "A healthy heart.",
+          "She has a kind heart."
+        ]
+      },
+      {
+        "word": "Stomach",
+        "translation": "Oshqozon / Желудок",
+        "uz": "Oshqozon",
+        "ru": "Желудок",
+        "emoji": "🍽️",
+        "sentences": [
+          "My stomach is rumbling.",
+          "Stomach pain."
+        ]
+      },
+      {
+        "word": "Blood",
+        "translation": "Qon / Кровь",
+        "uz": "Qon",
+        "ru": "Кровь",
+        "emoji": "🩸",
+        "sentences": [
+          "Blood is red.",
+          "He donated blood."
+        ]
+      },
+      {
+        "word": "Muscle",
+        "translation": "Mushak / Мышца",
+        "uz": "Mushak",
+        "ru": "Мышца",
+        "emoji": "💪",
+        "sentences": [
+          "He has strong muscles.",
+          "Exercise builds muscle."
+        ]
+      },
+      {
+        "word": "Bone",
+        "translation": "Suyak / Кость",
+        "uz": "Suyak",
+        "ru": "Кость",
+        "emoji": "🦴",
+        "sentences": [
+          "The dog found a bone.",
+          "Broken bone."
+        ]
+      },
+      {
+        "word": "Skin",
+        "translation": "Teri / Кожа",
+        "uz": "Teri",
+        "ru": "Кожа",
+        "emoji": "🤚",
+        "sentences": [
+          "Soft skin.",
+          "Skin care routine."
+        ]
+      },
+      {
+        "word": "Brain",
+        "translation": "Miya / Мозг",
+        "uz": "Miya",
+        "ru": "Мозг",
+        "emoji": "🧠",
+        "sentences": [
+          "Use your brain.",
+          "The brain controls the body."
+        ]
+      },
+      {
+        "word": "Eye",
+        "translation": "Ko'z / Глаз",
+        "uz": "Ko'z",
+        "ru": "Глаз",
+        "emoji": "👁️",
+        "sentences": [
+          "Blue eyes.",
+          "Keep an eye on him."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "set_house",
+    "category": "house",
+    "categoryLabel": "🏠 House",
+    "fromLang": "en",
+    "fromLangLabel": "English",
+    "toLang": "uz_ru",
+    "toLangLabel": "Uzbek / Russian",
+    "words": [
+      {
+        "word": "Window",
+        "translation": "Deraza / Окно",
+        "uz": "Deraza",
+        "ru": "Окно",
+        "emoji": "🪟",
+        "sentences": [
+          "Open the window.",
+          "Look out the window."
+        ]
+      },
+      {
+        "word": "Door",
+        "translation": "Eshik / Дверь",
+        "uz": "Eshik",
+        "ru": "Дверь",
+        "emoji": "🚪",
+        "sentences": [
+          "Close the door.",
+          "The front door."
+        ]
+      },
+      {
+        "word": "Wall",
+        "translation": "Devor / Стена",
+        "uz": "Devor",
+        "ru": "Стена",
+        "emoji": "🧱",
+        "sentences": [
+          "A brick wall.",
+          "Hang a picture on the wall."
+        ]
+      },
+      {
+        "word": "Roof",
+        "translation": "Tom / Крыша",
+        "uz": "Tom",
+        "ru": "Крыша",
+        "emoji": "🛖",
+        "sentences": [
+          "A red roof.",
+          "Rain is falling on the roof."
+        ]
+      },
+      {
+        "word": "Floor",
+        "translation": "Pol / Пол",
+        "uz": "Pol",
+        "ru": "Пол",
+        "emoji": "🪵",
+        "sentences": [
+          "Sweep the floor.",
+          "Sit on the floor."
+        ]
+      },
+      {
+        "word": "Ceiling",
+        "translation": "Shift / Потолок",
+        "uz": "Shift",
+        "ru": "Потолок",
+        "emoji": "☁️",
+        "sentences": [
+          "A high ceiling.",
+          "Look at the ceiling."
+        ]
+      },
+      {
+        "word": "Furniture",
+        "translation": "Mebel / Мебель",
+        "uz": "Mebel",
+        "ru": "Мебель",
+        "emoji": "🛋️",
+        "sentences": [
+          "Wooden furniture.",
+          "Buy some new furniture."
+        ]
+      },
+      {
+        "word": "Mirror",
+        "translation": "Ko'zgu / Зеркало",
+        "uz": "Ko'zgu",
+        "ru": "Зеркало",
+        "emoji": "🪞",
+        "sentences": [
+          "Look in the mirror.",
+          "A broken mirror."
+        ]
+      },
+      {
+        "word": "Carpet",
+        "translation": "Gilam / Ковер",
+        "uz": "Gilam",
+        "ru": "Ковер",
+        "emoji": "🧶",
+        "sentences": [
+          "A Persian carpet.",
+          "Vacuum the carpet."
+        ]
+      },
+      {
+        "word": "Curtain",
+        "translation": "Parda / Занавеска",
+        "uz": "Parda",
+        "ru": "Занавеска",
+        "emoji": "🪟",
+        "sentences": [
+          "Draw the curtains.",
+          "White silk curtains."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "set_clothes",
+    "category": "clothes",
+    "categoryLabel": "👕 Clothes",
+    "words": [
+      {
+        "word": "Shirt",
+        "translation": "Ko'ylak / Рубашка",
+        "uz": "Ko'ylak",
+        "ru": "Рубашка",
+        "emoji": "👕",
+        "sentences": [
+          "A white shirt.",
+          "Button up your shirt."
+        ]
+      },
+      {
+        "word": "Pants",
+        "translation": "Shim / Брюки",
+        "uz": "Shim",
+        "ru": "Брюки",
+        "emoji": "👖",
+        "sentences": [
+          "I need new pants.",
+          "Black pants."
+        ]
+      },
+      {
+        "word": "Shoes",
+        "translation": "Poyabzal / Обувь",
+        "uz": "Poyabzal",
+        "ru": "Обувь",
+        "emoji": "👞",
+        "sentences": [
+          "Polish the shoes.",
+          "Comfortable shoes."
+        ]
+      },
+      {
+        "word": "Hat",
+        "translation": "Shlyapa / Шляпа",
+        "uz": "Shlyapa",
+        "ru": "Шляпа",
+        "emoji": "🎩",
+        "sentences": [
+          "Wear a hat in the sun.",
+          "A big hat."
+        ]
+      },
+      {
+        "word": "Jacket",
+        "translation": "Kurtka / Куртка",
+        "uz": "Kurtka",
+        "ru": "Куртка",
+        "emoji": "🧥",
+        "sentences": [
+          "It's cold, take a jacket.",
+          "A leather jacket."
+        ]
+      },
+      {
+        "word": "Dress",
+        "translation": "Ayollar ko'ylagi / Платье",
+        "uz": "Ko'ylak",
+        "ru": "Платье",
+        "emoji": "👗",
+        "sentences": [
+          "A beautiful dress.",
+          "She bought a red dress."
+        ]
+      },
+      {
+        "word": "Socks",
+        "translation": "Paypoq / Носки",
+        "uz": "Paypoq",
+        "ru": "Носки",
+        "emoji": "🧦",
+        "sentences": [
+          "Cotton socks.",
+          "A pair of socks."
+        ]
+      },
+      {
+        "word": "Gloves",
+        "translation": "Qo'lqop / Перчатки",
+        "uz": "Qo'lqop",
+        "ru": "Перчатки",
+        "emoji": "🧤",
+        "sentences": [
+          "Winter gloves.",
+          "Wear gloves when it snows."
+        ]
+      },
+      {
+        "word": "Scarf",
+        "translation": "Sharf / Шарф",
+        "uz": "Sharf",
+        "ru": "Шарф",
+        "emoji": "🧣",
+        "sentences": [
+          "A warm scarf.",
+          "She wrapped a scarf around her neck."
+        ]
+      },
+      {
+        "word": "Tie",
+        "translation": "Bo'yinbog' / Галстук",
+        "uz": "Bo'yinbog'",
+        "ru": "Галстук",
+        "emoji": "👔",
+        "sentences": [
+          "A suit and tie.",
+          "He wears a tie to work."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "set_food",
+    "category": "food",
+    "categoryLabel": "🍔 Food",
+    "words": [
+      {
+        "word": "Bread",
+        "translation": "Non / Хлеб",
+        "uz": "Non",
+        "ru": "Хлеб",
+        "emoji": "🍞",
+        "sentences": [
+          "Fresh bread.",
+          "Bake some bread."
+        ]
+      },
+      {
+        "word": "Water",
+        "translation": "Suv / Вода",
+        "uz": "Suv",
+        "ru": "Вода",
+        "emoji": "💧",
+        "sentences": [
+          "Drink water every day.",
+          "A glass of water."
+        ]
+      },
+      {
+        "word": "Meat",
+        "translation": "Go'sht / Мясо",
+        "uz": "Go'sht",
+        "ru": "Мясо",
+        "emoji": "🥩",
+        "sentences": [
+          "Cook the meat well.",
+          "I don't eat meat."
+        ]
+      },
+      {
+        "word": "Rice",
+        "translation": "Guruch / Рис",
+        "uz": "Guruch",
+        "ru": "Рис",
+        "emoji": "🍚",
+        "sentences": [
+          "A bowl of rice.",
+          "Boil the rice."
+        ]
+      },
+      {
+        "word": "Apple",
+        "translation": "Olma / Яблоко",
+        "uz": "Olma",
+        "ru": "Яблоко",
+        "emoji": "🍎",
+        "sentences": [
+          "An apple a day.",
+          "A sweet apple."
+        ]
+      },
+      {
+        "word": "Cheese",
+        "translation": "Pishloq / Сыр",
+        "uz": "Pishloq",
+        "ru": "Сыр",
+        "emoji": "🧀",
+        "sentences": [
+          "Bread and cheese.",
+          "Melted cheese."
+        ]
+      },
+      {
+        "word": "Egg",
+        "translation": "Tuxum / Яйцо",
+        "uz": "Tuxum",
+        "ru": "Яйцо",
+        "emoji": "🥚",
+        "sentences": [
+          "Boil an egg.",
+          "Fried eggs."
+        ]
+      },
+      {
+        "word": "Fish",
+        "translation": "Baliq / Рыба",
+        "uz": "Baliq",
+        "ru": "Рыба",
+        "emoji": "🐟",
+        "sentences": [
+          "Fresh fish.",
+          "We had fish for dinner."
+        ]
+      },
+      {
+        "word": "Sugar",
+        "translation": "Shakar / Сахар",
+        "uz": "Shakar",
+        "ru": "Сахар",
+        "emoji": "🍬",
+        "sentences": [
+          "Too much sugar is bad.",
+          "Add some sugar to tea."
+        ]
+      },
+      {
+        "word": "Salt",
+        "translation": "Tuz / Соль",
+        "uz": "Tuz",
+        "ru": "Соль",
+        "emoji": "🧂",
+        "sentences": [
+          "Pass the salt.",
+          "A pinch of salt."
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,28 @@
+{
+  "name": "cefr-center-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch-path=server.js --watch-path=routes --watch-path=models server.js",
+    "clear-users": "node scripts/clear_users.js",
+    "fix-referrals": "node scripts/fix_referral_usernames.js",
+    "seed": "node scripts/seed_content.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.106.1",
+    "axios": "^1.6.7",
+    "compression": "^1.8.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
+    "firebase-admin": "^13.8.0",
+    "groq-sdk": "^1.2.0",
+    "helmet": "^8.1.0",
+    "mongoose": "^9.4.1",
+    "multer": "^2.1.1",
+    "node-fetch": "^3.3.2",
+    "nodemailer": "^8.0.6",
+    "socket.io": "^4.8.3"
+  }
+}
