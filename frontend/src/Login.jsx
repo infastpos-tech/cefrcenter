@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile
@@ -29,6 +31,23 @@ export default function Login() {
   const [showPwd, setShowPwd]         = useState(false);
   const [checkLoad, setCheckLoad]     = useState(false);
   const [userStatus, setUserStatus]   = useState(null);
+
+  // Catch redirect login result on mount
+  useEffect(() => {
+    if (!auth) return;
+    getRedirectResult(auth)
+      .then((res) => {
+        if (res?.user) {
+          navigate("/dashboard", { replace: true });
+        }
+      })
+      .catch((err) => {
+        console.error("Google redirect sign-in error:", err);
+        if (err.code !== "auth/popup-closed-by-user") {
+          setError(err.message || "Google sign-in failed. Please try again.");
+        }
+      });
+  }, [navigate]);
 
   useEffect(() => {
     if (isLoginMode) { setUserStatus(null); setError(""); return; }
@@ -91,14 +110,43 @@ export default function Login() {
   const handleGoogle = async () => {
     setLoading(true); setError("");
     try {
-      await signInWithPopup(auth, provider);
-      navigate("/dashboard", { replace: true });
+      if (!auth || !provider) {
+        throw new Error("Firebase Auth is not initialized.");
+      }
+      try {
+        const res = await signInWithPopup(auth, provider);
+        if (res?.user) {
+          navigate("/dashboard", { replace: true });
+        }
+      } catch (popupErr) {
+        console.warn("signInWithPopup error:", popupErr.code, popupErr.message);
+        if (popupErr.code === "auth/popup-closed-by-user") {
+          setError("Google sign-in was cancelled.");
+          return;
+        }
+        if (
+          popupErr.code === "auth/popup-blocked" ||
+          popupErr.code === "auth/cancelled-popup-request"
+        ) {
+          console.log("Popup blocked, attempting signInWithRedirect...");
+          await signInWithRedirect(auth, provider);
+          return;
+        }
+        throw popupErr;
+      }
     } catch (err) {
-      setError(
-        err.code === "auth/popup-closed-by-user" ? "Google sign-in was cancelled." :
-        err.code === "auth/network-request-failed" ? "Network error. Check your connection." :
-        "Google sign-in failed. Please try again."
-      );
+      console.error("Google sign-in failed:", err.code, err.message, err);
+      if (err.code === "auth/unauthorized-domain") {
+        setError("Domain not authorized in Firebase Console (Authentication > Settings > Authorized Domains).");
+      } else if (err.code === "auth/operation-not-allowed") {
+        setError("Google Sign-In is disabled in Firebase Console (Authentication > Sign-in method > Google).");
+      } else if (err.code === "auth/popup-closed-by-user") {
+        setError("Google sign-in was cancelled.");
+      } else if (err.code === "auth/network-request-failed") {
+        setError("Network error. Check your internet connection.");
+      } else {
+        setError(err.message || (err.code ? `Google Auth error (${err.code})` : "Google sign-in failed. Please try again."));
+      }
     } finally { setLoading(false); }
   };
 

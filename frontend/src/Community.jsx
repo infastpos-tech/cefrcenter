@@ -24,7 +24,7 @@ const PostCard = ({ post, user, toggleLike, handleDelete }) => {
              <div style={{ fontSize: 11, color: "#64748b", fontWeight: 600 }}>{new Date(post.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</div>
            </div>
         </div>
-        <div style={{ display: "flex", aligItems: "center", gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span className="cat-badge" style={{ 
             background: post.category === "Essay" ? "rgba(74,158,255,0.1)" : "rgba(239,159,39,0.1)",
             color: post.category === "Essay" ? "#4a9eff" : "#EF9F27",

@@ -22,6 +22,7 @@ try {
   analytics = typeof window !== "undefined" ? getAnalytics(app) : null;
   auth = getAuth(app);
   provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
   setPersistence(auth, browserLocalPersistence).catch(() => {});
 } catch (e) {
   console.warn("Firebase init failed, continuing without auth analytics.", e);
