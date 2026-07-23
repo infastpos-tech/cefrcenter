@@ -36,13 +36,22 @@ fs.watch(vocabularyPath, (event) => {
   }
 });
 
+import mongoose from "mongoose";
+
 // GET /api/vocabulary — get all sets
 router.get("/", async (req, res) => {
   try {
-    // 1. Get data from MongoDB
-    let dbSets = await VocabularySet
-      .find({}, { __v: 0, _id: 0, createdAt: 0, updatedAt: 0 })
-      .lean();
+    // 1. Get data from MongoDB if connected
+    let dbSets = [];
+    if (mongoose.connection.readyState === 1) {
+      try {
+        dbSets = await VocabularySet
+          .find({}, { __v: 0, _id: 0, createdAt: 0, updatedAt: 0 })
+          .lean();
+      } catch (e) {
+        dbSets = [];
+      }
+    }
 
     // 2. Merge them (using id as unique key, using cached jsonSetsCache)
     const allSetsMap = new Map();
@@ -52,9 +61,9 @@ router.get("/", async (req, res) => {
       allSetsMap.set(set.id, {
         ...set,
         title: set.categoryLabel || set.category,
-        words: set.words.map(w => ({
+        words: (set.words || []).map(w => ({
           ...w,
-          translation: w.translation || `${w.uz} / ${w.ru}`,
+          translation: w.translation || `${w.uz || ''} / ${w.ru || ''}`,
           sentences: w.sentences || []
         }))
       });
@@ -66,15 +75,10 @@ router.get("/", async (req, res) => {
     });
 
     const finalSets = Array.from(allSetsMap.values());
-
-    if (finalSets.length === 0) {
-      return res.status(404).json({ message: "No vocabulary data found." });
-    }
-
     res.json(finalSets);
   } catch (err) {
     console.error("GET /vocabulary error:", err.message);
-    res.status(500).json({ message: "Error fetching vocabulary", error: err.message });
+    res.json(jsonSetsCache || []);
   }
 });
 

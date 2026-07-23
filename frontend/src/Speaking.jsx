@@ -10,6 +10,11 @@ const STYLES = `
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
   @keyframes slideIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
   @keyframes voicePulse { 0% { transform: scaleY(1); } 50% { transform: scaleY(1.8); } 100% { transform: scaleY(1); } }
+  @keyframes micPulseGlow {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,0.7); }
+    70% { transform: scale(1.08); box-shadow: 0 0 0 22px rgba(239,68,68,0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+  }
 `;
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -39,8 +44,17 @@ function playTing() {
   new Audio(TING_URL).play().catch(() => {});
 }
 
+function stopTTS(a) {
+  if (typeof window !== "undefined" && window.speechSynthesis) {
+    try { window.speechSynthesis.cancel(); } catch(e){}
+  }
+  if (a && typeof a.pause === "function") {
+    try { a.pause(); } catch(e){}
+  }
+}
+
 function playTTS(t) {
-  if (!t) return;
+  if (!t) return null;
   const text = String(t).trim();
   if (typeof window !== "undefined" && window.speechSynthesis) {
     try {
@@ -55,9 +69,13 @@ function playTTS(t) {
       console.warn("speechSynthesis failed", e);
     }
   }
-  const a = new Audio(getTTS(text));
-  a.play().catch(() => {});
-  return a;
+  try {
+    const a = new Audio(getTTS(text));
+    a.play().catch(() => {});
+    return a;
+  } catch(e) {
+    return null;
+  }
 }
 
 // ─── Score → band/color mapping ───────────────────────────────────────────────
@@ -304,8 +322,18 @@ function CountdownCircle({ sec, total, color = "#4a9eff", size = 80 }) {
 // ─── Prep Phase ───────────────────────────────────────────────────────────────
 function PrepPhase({ total, question, images, pN_main, onEnd }) {
   const [sec, setSec] = useState(total);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const ref = useRef(null);
   const audioRef = useRef(null);
+
+  const handlePlayAudio = () => {
+    if (question) {
+      setIsPlayingAudio(true);
+      if (audioRef.current && audioRef.current.pause) audioRef.current.pause();
+      audioRef.current = playTTS(question);
+      setTimeout(() => setIsPlayingAudio(false), 4000);
+    }
+  };
 
   useEffect(() => {
     setSec(total);
@@ -317,14 +345,14 @@ function PrepPhase({ total, question, images, pN_main, onEnd }) {
     ref.current = setInterval(() => setSec(s => (s <= 1 ? 0 : s - 1)), 1000);
     return () => {
       clearInterval(ref.current);
-      if (audioRef.current) audioRef.current.pause();
+      if (audioRef.current && audioRef.current.pause) audioRef.current.pause();
     };
   }, [total, question]);
 
   useEffect(() => { 
     if (sec === 0) { 
       clearInterval(ref.current); 
-      playTing(); // Ting sound at end of prep
+      playTing();
       onEnd?.(); 
     } 
   }, [sec]);
@@ -332,7 +360,7 @@ function PrepPhase({ total, question, images, pN_main, onEnd }) {
   return (
     <div style={{ animation: "fadeUp .4s ease" }}>
       {/* Visual Progress Bar (1-2-3) */}
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 10, marginBottom: 30 }}>
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 10, marginBottom: 24 }}>
          {[1, 2, 3].map(n => (
            <React.Fragment key={n}>
              <div style={{ 
@@ -355,55 +383,102 @@ function PrepPhase({ total, question, images, pN_main, onEnd }) {
             ))}
           </div>
         )}
-        <h3 style={{ fontSize: 24, color: "#f0f4ff", fontWeight: 900, marginBottom: 10, lineHeight: 1.4 }}>{question}</h3>
+        <h3 style={{ fontSize: 24, color: "#f0f4ff", fontWeight: 900, marginBottom: 16, lineHeight: 1.4 }}>{question}</h3>
+
+        {/* Play Audio Sound Button */}
+        <button 
+          onClick={handlePlayAudio}
+          style={{
+            padding: "10px 22px", borderRadius: 30, background: "rgba(74,158,255,0.15)",
+            border: "1px solid rgba(74,158,255,0.4)", color: "#4a9eff", fontWeight: 800,
+            fontSize: 14, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8,
+            transition: "all 0.2s ease"
+          }}
+        >
+          🔊 {isPlayingAudio ? "Ovoz o'qilmoqda..." : "Savolni eshitish (Play Audio)"}
+        </button>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
-        <div style={{ position: "relative", width: 140, height: 140 }}>
-           <svg width="140" height="140" style={{ transform: "rotate(-90deg)" }}>
-              <circle cx="70" cy="70" r="65" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8"/>
-              <circle cx="70" cy="70" r="65" fill="none" stroke="#4a9eff" strokeWidth="8"
-                strokeDasharray={2 * Math.PI * 65} strokeDashoffset={(2 * Math.PI * 65) - (2 * Math.PI * 65 * (sec / total))} />
+        <div style={{ position: "relative", width: 130, height: 130 }}>
+           <svg width="130" height="130" style={{ transform: "rotate(-90deg)" }}>
+              <circle cx="65" cy="65" r="60" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8"/>
+              <circle cx="65" cy="65" r="60" fill="none" stroke="#4a9eff" strokeWidth="8"
+                strokeDasharray={2 * Math.PI * 60} strokeDashoffset={(2 * Math.PI * 60) - (2 * Math.PI * 60 * (sec / total))} />
            </svg>
-           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 44, fontWeight: 900, color: "#fff" }}>
+           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40, fontWeight: 900, color: "#fff" }}>
               {sec}
            </div>
         </div>
-        <p style={{ color: "#8b9bbf", fontSize: 13, fontWeight: "bold" }}>PREPARING TO ANSWER...</p>
+        <p style={{ color: "#8b9bbf", fontSize: 13, fontWeight: "bold" }}>TAYYORLANING (PREPARING TO ANSWER)...</p>
+
+        {/* Microphone Start Button */}
+        <button
+          onClick={() => { playTing(); onEnd?.(); }}
+          style={{
+            padding: "16px 36px", borderRadius: 40, background: "linear-gradient(135deg, #22c55e, #16a34a)",
+            color: "#fff", fontWeight: 900, fontSize: 18, border: "none", cursor: "pointer",
+            boxShadow: "0 10px 30px rgba(34,197,94,0.4)", display: "flex", alignItems: "center", gap: 12,
+            transition: "transform 0.2s ease"
+          }}
+        >
+          <span style={{ fontSize: 24 }}>🎙️</span> HOZIR GAPIRISHNI BOSHLASH (START NOW)
+        </button>
       </div>
     </div>
   );
 }
 
 // ─── Recording Phase ──────────────────────────────────────────────────────────
-function RecordPhase({ question, images, pN_main, speakTime, transcript, onDone, onTranscriptChange }) {
+function RecordPhase({ question, images, pN_main, speakTime, transcript, onDone, onTranscriptChange, onToggleRec }) {
   const [sec, setSec] = useState(speakTime);
   const [stopped, setStopped] = useState(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const ref = useRef(null);
+  const audioRef = useRef(null);
   const hasSpeechRecognition = typeof window !== "undefined" && !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+
+  const handlePlayAudio = () => {
+    if (question) {
+      setIsPlayingAudio(true);
+      if (audioRef.current && audioRef.current.pause) audioRef.current.pause();
+      audioRef.current = playTTS(question);
+      setTimeout(() => setIsPlayingAudio(false), 4000);
+    }
+  };
 
   useEffect(() => {
     setSec(speakTime);
     setStopped(false);
     ref.current = setInterval(() => setSec(s => (s <= 1 ? 0 : s-1)), 1000);
-    return () => clearInterval(ref.current);
+    return () => {
+      clearInterval(ref.current);
+      if (audioRef.current && audioRef.current.pause) audioRef.current.pause();
+    };
   }, [speakTime, question]);
 
   useEffect(() => {
     if (sec === 0 && !stopped) {
        clearInterval(ref.current);
        setStopped(true);
-       playTing(); // Ting sound at end of speaking
-       onDone?.(); // Immediate auto-next for performance
+       playTing();
+       onDone?.();
     }
   }, [sec, stopped]);
 
-  const progress = (sec / speakTime) * 100;
+  const handleMicClick = () => {
+    playTing();
+    setStopped(true);
+    if (onToggleRec) {
+      onToggleRec();
+    }
+    onDone?.();
+  };
 
   return (
     <div style={{ animation: "slideIn .3s ease" }}>
       {/* Visual Progress Bar (1-2-3) */}
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 10, marginBottom: 30 }}>
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 10, marginBottom: 24 }}>
          {[1, 2, 3].map(n => (
            <React.Fragment key={n}>
              <div style={{ 
@@ -418,7 +493,7 @@ function RecordPhase({ question, images, pN_main, speakTime, transcript, onDone,
          ))}
       </div>
 
-      <div style={{ background: "#18243a", padding: 30, borderRadius: 20, border: "2px solid #4a9eff55", marginBottom: 20, textAlign: "center" }}>
+      <div style={{ background: "#18243a", padding: 24, borderRadius: 20, border: "2px solid #22c55e88", marginBottom: 20, textAlign: "center" }}>
         {images?.length > 0 && (
           <div style={{ display: "grid", gridTemplateColumns: images.length > 1 ? "1fr 1fr" : "1fr", gap: 12, marginBottom: 20 }}>
             {images.map((img, i) => (
@@ -426,36 +501,91 @@ function RecordPhase({ question, images, pN_main, speakTime, transcript, onDone,
             ))}
           </div>
         )}
+
+        <h3 style={{ fontSize: 22, color: "#f0f4ff", fontWeight: 900, marginBottom: 14, lineHeight: 1.4 }}>{question}</h3>
+
+        {/* Re-play Question Audio */}
+        <button 
+          onClick={handlePlayAudio}
+          style={{
+            padding: "8px 18px", borderRadius: 20, background: "rgba(74,158,255,0.15)",
+            border: "1px solid rgba(74,158,255,0.4)", color: "#4a9eff", fontWeight: 800,
+            fontSize: 13, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6,
+            marginBottom: 20
+          }}
+        >
+          🔊 {isPlayingAudio ? "Ovoz o'qilmoqda..." : "Savolni eshitish (Audio)"}
+        </button>
+
+        {/* Live Audio Visualizer Waveform */}
         <div style={{ marginBottom: 20 }}>
            <ProminentVisualizer isRecording={!stopped} />
         </div>
         
-        <div style={{ position: "relative", width: 180, height: 180, margin: "0 auto" }}>
-          <svg width="180" height="180" style={{ transform: "rotate(-90deg)" }}>
-            <circle cx="90" cy="90" r="80" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="12"/>
-            <circle cx="90" cy="90" r="80" fill="none" stroke="#22c55e" strokeWidth="12"
-              strokeDasharray={2 * Math.PI * 80} strokeDashoffset={(2 * Math.PI * 80) - (2 * Math.PI * 80 * (sec / speakTime))} />
+        {/* Giant Interactive Pulse Microphone Button */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, marginBottom: 20 }}>
+          <button
+            onClick={handleMicClick}
+            style={{
+              width: 100, height: 100, borderRadius: "50%",
+              background: !stopped ? "linear-gradient(135deg, #ef4444, #dc2626)" : "linear-gradient(135deg, #22c55e, #16a34a)",
+              border: "4px solid rgba(255,255,255,0.3)", color: "#fff",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", transition: "all 0.3s ease",
+              boxShadow: !stopped ? "0 0 35px rgba(239, 68, 68, 0.6)" : "0 0 20px rgba(34, 197, 94, 0.4)",
+              animation: !stopped ? "micPulseGlow 1.8s infinite ease-in-out" : "none"
+            }}
+          >
+            <span style={{ fontSize: 44 }}>🎙️</span>
+          </button>
+
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <span style={{ color: !stopped ? "#ef4444" : "#22c55e", fontSize: 15, fontWeight: 900, letterSpacing: 0.5 }}>
+              {!stopped ? "🔴 YOZIB OLINMOQDA... (GAPIRING)" : "✅ GAPIRIB BO'LINDI"}
+            </span>
+            <span style={{ color: "#8b9bbf", fontSize: 12, marginTop: 4 }}>
+              {!stopped ? "Tugatish uchun mikrofonga bosing (Tap mic to stop)" : "Keyingi bosqich tayyorlanmoqda..."}
+            </span>
+          </div>
+        </div>
+
+        {/* Timer Circle */}
+        <div style={{ position: "relative", width: 140, height: 140, margin: "0 auto" }}>
+          <svg width="140" height="140" style={{ transform: "rotate(-90deg)" }}>
+            <circle cx="70" cy="70" r="60" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="10"/>
+            <circle cx="70" cy="70" r="60" fill="none" stroke="#22c55e" strokeWidth="10"
+              strokeDasharray={2 * Math.PI * 60} strokeDashoffset={(2 * Math.PI * 60) - (2 * Math.PI * 60 * (sec / speakTime))} />
           </svg>
-          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 64, fontWeight: 900, color: "#fff" }}>
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 48, fontWeight: 900, color: "#fff" }}>
             {sec}
           </div>
         </div>
       </div>
 
-      <div style={{ padding: 14, background: "rgba(255,255,255,0.03)", borderRadius: 12, border: "1px solid rgba(255,255,255,0.06)", minHeight: 60 }}>
-        <span style={{ color: "#4a9eff", fontSize: 11, fontWeight: 800, display: "block", marginBottom: 6, textTransform: "uppercase" }}>Live Listening:</span>
+      {/* Live Transcript Display */}
+      <div style={{ padding: 16, background: "rgba(255,255,255,0.04)", borderRadius: 14, border: "1px solid rgba(255,255,255,0.08)", minHeight: 80 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+          <span style={{ color: "#4a9eff", fontSize: 12, fontWeight: 800, textTransform: "uppercase" }}>
+            🎙️ Ovozni matnga aylantirish (Live Transcript):
+          </span>
+          <span style={{ fontSize: 11, color: "#8b9bbf" }}>
+            {transcript ? `${transcript.split(/\s+/).filter(Boolean).length} so'z` : '0 so\'z'}
+          </span>
+        </div>
         {!hasSpeechRecognition ? (
           <div style={{ display: "grid", gap: 8 }}>
             <textarea
               value={transcript || ""}
               onChange={(e) => onTranscriptChange?.(e.target.value)}
-              placeholder="Type your answer here if speech recognition is unavailable..."
+              placeholder="Brauzeringizda mikrofondan matnga o'girish qo'llab-quvvatlanmaydi. Javobingizni shu yerga yozishingiz mumkin..."
               style={{ width: "100%", minHeight: 80, borderRadius: 10, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.04)", color: "#f0f4ff", padding: 10, fontFamily: "inherit", resize: "vertical" }}
             />
-            <span style={{ color: "#8b9bbf", fontSize: 12 }}>Speech recognition is unavailable in this browser, so a text fallback is enabled.</span>
+            <span style={{ color: "#8b9bbf", fontSize: 12 }}>Google Chrome yoki MS Edge ishlatish tavsiya etiladi.</span>
           </div>
         ) : (
-          <span style={{ color: "#f0f4ff", fontSize: 14, lineHeight: 1.6 }}>{transcript || "..."}</span>
+          <span style={{ color: "#f0f4ff", fontSize: 15, lineHeight: 1.6, fontStyle: transcript ? "normal" : "italic" }}>
+            {transcript || "Gapiring, sizning ovozingiz shu yerda ko'rinadi..."}
+          </span>
         )}
       </div>
     </div>
@@ -568,13 +698,23 @@ export default function Speaking({ user, progress, scores, saveScore, addXP, add
   }, [selPart]);
 
   const questions = getQuestions();
-  const curQ      = questions[qIdx] || questions[0];
+  const curQ      = (questions && questions[qIdx]) || questions[0] || {
+    id: "fallback_q",
+    question: "Describe a topic you find interesting.",
+    prepTime: 5,
+    speakTime: 30,
+    images: []
+  };
   const pc        = selPart?.color || "#4a9eff";
 
   const isPartDone = (testId, partId) => !!scores?.[`speaking_${testId}_${partId}`];
-  const isTestDone = (t) => t.parts.every(p => isPartDone(t.id, p.id));
+  const isTestDone = (t) => t.parts && t.parts.every(p => isPartDone(t.id, p.id));
 
   const openTest = (t) => {
+    if (!t || !t.parts || t.parts.length === 0) {
+      setError("Ushbu testda bo'limlar mavjud emas.");
+      return;
+    }
     setSelTest(t);
     const firstIncomplete = t.parts.findIndex(p => !isPartDone(t.id, p.id));
     setPIdx(firstIncomplete >= 0 ? firstIncomplete : 0);
@@ -994,6 +1134,7 @@ export default function Speaking({ user, progress, scores, saveScore, addXP, add
           transcript={transcript}
           onDone={handleQuestionDone}
           onTranscriptChange={updateTranscript}
+          onToggleRec={handleStopEarly}
         />
       )}
 
@@ -1097,12 +1238,27 @@ export default function Speaking({ user, progress, scores, saveScore, addXP, add
       )}
     </div>
   );
+
+  // Final fallback return if view is invalid or part missing
+  return (
+    <div style={{ textAlign: "center", padding: "60px 20px", color: "#8b9bbf", background: "#18243a", borderRadius: 16, border: "1px solid rgba(255,255,255,0.08)", margin: "20px 0" }}>
+      <div style={{ fontSize: 40, marginBottom: 12 }}>🎤</div>
+      <h3 style={{ color: "#f0f4ff", marginBottom: 8 }}>Test bo'limi topilmadi</h3>
+      <p style={{ fontSize: 14, marginBottom: 20 }}>Iltimos, qaytadan testni tanlang.</p>
+      <button 
+        onClick={() => { setView("list"); setSelTest(null); }} 
+        style={{ padding: "12px 28px", borderRadius: 10, background: "#4a9eff", color: "#fff", border: "none", fontWeight: 700, cursor: "pointer" }}
+      >
+        ← Testlar ro'yxatiga qaytish
+      </button>
+    </div>
+  );
 }
 
 function IntroAudio({ text }) {
   useEffect(() => {
     const a = playTTS(text);
-    return () => { if (a) a.pause(); };
+    return () => { stopTTS(a); };
   }, [text]);
   return null;
 }

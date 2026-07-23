@@ -63,12 +63,15 @@ router.post("/post", async (req, res) => {
   }
 });
 
+import mongoose from "mongoose";
+
 router.get("/posts", async (req, res) => {
   try {
+    if (mongoose.connection.readyState !== 1) return res.json([]);
     const posts = await Community.find({ aiApproved: true }).sort({ date: -1 }).limit(50);
     res.json(posts);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.json([]);
   }
 });
 

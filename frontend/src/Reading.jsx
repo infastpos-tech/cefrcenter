@@ -40,14 +40,24 @@ function scoreLocal(part, ans) {
   let c = 0;
   const items = part.gaps || part.questions || part.paragraphs || part.sentences || [];
   items.forEach((item, i) => {
-    const ua = ans[i] ?? ("");
-    if (part.type === "gap_fill" || part.type === "sentence_completion") {
+    const ua = ans[i] ?? "";
+    const ptype = part.type;
+    if (ptype === "gap_fill" || ptype === "sentence_completion") {
       const s = typeof ua === "string" ? ua : "";
       if (norm(s) === norm(item.answer) || (item.alt || []).map(norm).includes(norm(s))) c++;
-    } else if (part.type === "matching_text" || part.type === "heading_match") {
-      if (ua === item.answer) c++;
-    } else if (part.type === "mcq_reading") {
-      if (Number(ua) === (item.answer ?? -1) && ua !== "") c++;
+    } else if (ptype === "matching_text" || ptype === "heading_match") {
+      if (String(ua).trim().toUpperCase() === String(item.answer).trim().toUpperCase()) c++;
+    } else if (ptype === "true_false") {
+      if (norm(String(ua)) === norm(String(item.answer)) && ua !== "") c++;
+    } else {
+      // mcq_reading, short_answer, summary, multiple_choice, matching_headings
+      if (typeof item.answer === "number") {
+        if (Number(ua) === item.answer && ua !== "") c++;
+      } else if (typeof item.answer === "string" && !isNaN(Number(item.answer))) {
+        if (Number(ua) === Number(item.answer) && ua !== "") c++;
+      } else {
+        if (norm(String(ua)) === norm(String(item.answer)) && ua !== "") c++;
+      }
     }
   });
   return { correct: c, total: items.length };
@@ -78,22 +88,50 @@ export default function Reading({ progress, scores, saveScore, addXP, clearSecti
       const qR = items.map((item, i) => {
         const ua = ans[i] ?? "";
         let ok = false, correctAns = item.answer || "", userAns = ua;
-        if (part.type === "gap_fill" || part.type === "sentence_completion") {
+        const ptype = part.type;
+        const qNum = item.qNum || item.num || (i + 1);
+        const qText = item.question || item.q || item.label || (part.summaryText ? `Gap (${qNum})` : `Q${qNum}`);
+
+        let opts = item.options;
+        if (!opts && Array.isArray(part.options)) {
+          const rawOpt = part.options[i];
+          if (typeof rawOpt === "string") {
+            opts = rawOpt.split(/\s+(?=[A-D]\))/).map(s => s.trim()).filter(Boolean);
+          } else if (Array.isArray(rawOpt)) {
+            opts = rawOpt;
+          }
+        }
+
+        if (ptype === "gap_fill" || ptype === "sentence_completion") {
           ok = norm(ua) === norm(item.answer) || (item.alt || []).map(norm).includes(norm(ua));
-        } else if (part.type === "matching_text") {
-          ok = ua === item.answer;
+          correctAns = item.answer || "";
+          userAns = ua || "—";
+        } else if (ptype === "matching_text") {
+          ok = String(ua).toUpperCase() === String(item.answer).toUpperCase();
           correctAns = `${item.answer} (${part.options?.find(o => o.key === item.answer)?.name || item.answer})`;
           userAns = ua ? `${ua} (${part.options?.find(o => o.key === ua)?.name || ua})` : "—";
-        } else if (part.type === "heading_match") {
-          ok = ua === item.answer;
+        } else if (ptype === "heading_match") {
+          ok = String(ua).toUpperCase() === String(item.answer).toUpperCase();
           correctAns = part.headings?.find(h => h.key === item.answer)?.label || item.answer;
           userAns = ua ? part.headings?.find(h => h.key === ua)?.label || ua : "—";
-        } else if (part.type === "mcq_reading") {
-          ok = Number(ua) === (item.answer ?? -1) && ua !== "";
-          correctAns = item.options?.[item.answer] || item.answer;
-          userAns = ua !== "" ? item.options?.[Number(ua)] || ua : "—";
+        } else if (ptype === "true_false") {
+          ok = norm(String(ua)) === norm(String(item.answer)) && ua !== "";
+          correctAns = String(item.answer).toUpperCase();
+          userAns = ua ? String(ua).toUpperCase() : "—";
+        } else {
+          // mcq_reading, short_answer, summary, multiple_choice, matching_headings
+          if (typeof item.answer === "number" || (typeof item.answer === "string" && !isNaN(Number(item.answer)))) {
+            const numAns = Number(item.answer);
+            ok = Number(ua) === numAns && ua !== "";
+            correctAns = opts?.[numAns] || item.answer;
+            userAns = ua !== "" ? (opts?.[Number(ua)] || ua) : "—";
+          } else {
+            ok = norm(String(ua)) === norm(String(item.answer)) && ua !== "";
+            correctAns = item.answer;
+            userAns = ua || "—";
+          }
         }
-        return { q: item.label || `Q${item.num || i + 1}`, userAnswer: userAns || "—", correctAnswer: correctAns, isCorrect: ok };
+        return { q: `Q${qNum}: ${qText}`, userAnswer: userAns || "—", correctAnswer: correctAns, isCorrect: ok };
       });
       pResults.push({ partId: part.id, title: part.title, correct, total, qResults: qR });
     }
@@ -402,19 +440,175 @@ export default function Reading({ progress, scores, saveScore, addXP, clearSecti
         {part.type === "sentence_completion" && (
           <div>
             <div style={{ background: "#18243a", border: "0.5px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 18px", marginBottom: 14, maxHeight: 340, overflowY: "auto", fontSize: 13, color: "#c8d4f0", lineHeight: 1.85 }}>
-              {part.passage.split("\n\n").map((p, i) => <p key={i} style={{ marginBottom: 10 }}>{p}</p>)}
+              {part.passage && part.passage.split("\n\n").map((p, i) => <p key={i} style={{ marginBottom: 10 }}>{p}</p>)}
             </div>
             {part.sentences.map((s, i) => (
               <div key={i} style={{ background: "#18243a", border: "0.5px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: "14px 16px", marginBottom: 10 }}>
                 <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 8 }}>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: CLR, background: `${CLR}18`, padding: "2px 6px", borderRadius: 4, flexShrink: 0 }}>{s.num}</span>
-                  <p style={{ fontSize: 13, color: "#c8d4f0", lineHeight: 1.6, flex: 1 }}>{s.text.replace("___", "________")}</p>
+                  <span style={{ fontSize: 11, fontWeight: 800, color: CLR, background: `${CLR}18`, padding: "2px 6px", borderRadius: 4, flexShrink: 0 }}>{s.num || s.qNum || (i + 1)}</span>
+                  <p style={{ fontSize: 13, color: "#c8d4f0", lineHeight: 1.6, flex: 1 }}>{(s.text || s.question || "").replace("___", "________")}</p>
                 </div>
                 <input value={getAns(part.id, i)} onChange={e => setAns(part.id, i, e.target.value)}
                   placeholder="Type your answer (max 3 words from the passage)..."
                   style={{ width: "100%", background: "#0f1a2e", border: `1.5px solid ${getAns(part.id, i) ? CLR : "rgba(255,255,255,0.1)"}`, borderRadius: 8, padding: "9px 14px", color: "#f0f4ff", fontSize: 13, fontFamily: "inherit", outline: "none", transition: "border-color .2s" }} />
               </div>
             ))}
+          </div>
+        )}
+
+        {/* ── MCQ / SHORT ANSWER / SUMMARY / MULTIPLE CHOICE ── */}
+        {(part.type === "short_answer" || part.type === "summary" || part.type === "multiple_choice") && (
+          <div>
+            {(part.passageTitle || part.passage) && (
+              <div style={{ background: "#18243a", border: "0.5px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 18px", marginBottom: 14, maxHeight: 360, overflowY: "auto", fontSize: 13, color: "#c8d4f0", lineHeight: 1.85 }}>
+                {part.passageTitle && <h4 style={{ fontSize: 15, fontWeight: 700, color: "#f0f4ff", marginBottom: 8 }}>{part.passageTitle}</h4>}
+                {part.passage && part.passage.split("\n\n").map((p, i) => <p key={i} style={{ marginBottom: 10 }}>{p}</p>)}
+              </div>
+            )}
+
+            {part.summaryText && (
+              <div style={{ background: "#0d1829", border: "1px solid rgba(55,138,221,0.2)", borderRadius: 10, padding: 14, marginBottom: 14, fontSize: 13, color: "#e2e8f0", lineHeight: 1.8 }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: CLR, marginBottom: 6, textTransform: "uppercase" }}>Summary</p>
+                <div>{part.summaryText}</div>
+              </div>
+            )}
+
+            {items.map((q, i) => {
+              const qNum = q.qNum || q.num || (i + 1);
+              const qText = q.question || q.q || (part.summaryText ? `Gap (${qNum})` : "");
+              let opts = q.options;
+              if (!opts && Array.isArray(part.options)) {
+                const rawOpt = part.options[i];
+                if (typeof rawOpt === "string") {
+                  opts = rawOpt.split(/\s+(?=[A-D]\))/).map(s => s.trim()).filter(Boolean);
+                } else if (Array.isArray(rawOpt)) {
+                  opts = rawOpt;
+                }
+              }
+
+              return (
+                <div key={i} style={{ background: "#18243a", border: "0.5px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: "14px 16px", marginBottom: 10 }}>
+                  <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 10 }}>
+                    <span style={{ fontSize: 11, fontWeight: 800, color: CLR, background: `${CLR}18`, padding: "2px 6px", borderRadius: 4, flexShrink: 0 }}>{qNum}</span>
+                    {qText && <p style={{ fontSize: 13, fontWeight: 600, color: "#f0f4ff", lineHeight: 1.5 }}>{qText}</p>}
+                  </div>
+
+                  {opts && opts.length > 0 ? (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                      {opts.map((opt, j) => {
+                        const isSel = getAns(part.id, i) !== "" && Number(getAns(part.id, i)) === j;
+                        return (
+                          <div key={j} onClick={() => setAns(part.id, i, j)}
+                            style={{ padding: "9px 14px", borderRadius: 9, cursor: "pointer", fontSize: 13, border: isSel ? `2px solid ${CLR}` : "1px solid rgba(255,255,255,0.07)", background: isSel ? `${CLR}15` : "rgba(255,255,255,0.01)", color: isSel ? "#f0f4ff" : "#8b9bbf", transition: "all .12s", display: "flex", alignItems: "center", gap: 10 }}>
+                            <div style={{ width: 24, height: 24, borderRadius: "50%", flexShrink: 0, background: isSel ? CLR : "rgba(255,255,255,0.06)", color: isSel ? "#fff" : "#8b9bbf", fontWeight: 800, fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", border: isSel ? "none" : "1px solid rgba(255,255,255,0.15)" }}>
+                              {String.fromCharCode(65 + j)}
+                            </div>
+                            {opt}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <input value={getAns(part.id, i)} onChange={e => setAns(part.id, i, e.target.value)}
+                      placeholder="Type your answer..."
+                      style={{ width: "100%", background: "#0f1a2e", border: `1.5px solid ${getAns(part.id, i) ? CLR : "rgba(255,255,255,0.1)"}`, borderRadius: 8, padding: "9px 14px", color: "#f0f4ff", fontSize: 13, fontFamily: "inherit", outline: "none" }} />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* ── TRUE / FALSE / NOT GIVEN ── */}
+        {part.type === "true_false" && (
+          <div>
+            {part.passage && (
+              <div style={{ background: "#18243a", border: "0.5px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 18px", marginBottom: 14, maxHeight: 360, overflowY: "auto", fontSize: 13, color: "#c8d4f0", lineHeight: 1.85 }}>
+                {part.passageTitle && <h4 style={{ fontSize: 15, fontWeight: 700, color: "#f0f4ff", marginBottom: 8 }}>{part.passageTitle}</h4>}
+                {part.passage.split("\n\n").map((p, i) => <p key={i} style={{ marginBottom: 10 }}>{p}</p>)}
+              </div>
+            )}
+
+            {items.map((q, i) => {
+              const qNum = q.qNum || q.num || (i + 1);
+              const qText = q.question || q.q || "";
+              const currentVal = String(getAns(part.id, i)).toUpperCase();
+
+              return (
+                <div key={i} style={{ background: "#18243a", border: "0.5px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: "14px 16px", marginBottom: 10 }}>
+                  <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 10 }}>
+                    <span style={{ fontSize: 11, fontWeight: 800, color: CLR, background: `${CLR}18`, padding: "2px 6px", borderRadius: 4, flexShrink: 0 }}>{qNum}</span>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: "#f0f4ff", lineHeight: 1.5 }}>{qText}</p>
+                  </div>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    {["TRUE", "FALSE", "NOT GIVEN"].map((opt) => {
+                      const isSel = currentVal === opt;
+                      return (
+                        <button key={opt} onClick={() => setAns(part.id, i, opt)}
+                          style={{
+                            flex: 1, minWidth: 90, padding: "8px 12px", borderRadius: 8,
+                            border: isSel ? `2px solid ${CLR}` : "1px solid rgba(255,255,255,0.1)",
+                            background: isSel ? `${CLR}22` : "rgba(255,255,255,0.02)",
+                            color: isSel ? "#f0f4ff" : "#8b9bbf",
+                            fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
+                            transition: "all .12s ease"
+                          }}>
+                          {opt}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* ── MATCHING HEADINGS ── */}
+        {part.type === "matching_headings" && (
+          <div>
+            {part.sections && (
+              <div style={{ background: "#0d1829", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: 14, marginBottom: 14 }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: "#8b9bbf", marginBottom: 10, textTransform: "uppercase" }}>Sections</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {part.sections.map((sec, i) => (
+                    <div key={i} style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                      <p style={{ fontSize: 12, fontWeight: 800, color: CLR, marginBottom: 4 }}>{sec.heading}</p>
+                      <p style={{ fontSize: 12, color: "#c8d4f0", lineHeight: 1.6 }}>{sec.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {items.map((q, i) => {
+              const qNum = q.qNum || q.num || (i + 1);
+              const qText = q.question || q.q || "";
+              const opts = q.options || [];
+
+              return (
+                <div key={i} style={{ background: "#18243a", border: "0.5px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: "14px 16px", marginBottom: 10 }}>
+                  <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 10 }}>
+                    <span style={{ fontSize: 11, fontWeight: 800, color: CLR, background: `${CLR}18`, padding: "2px 6px", borderRadius: 4, flexShrink: 0 }}>{qNum}</span>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: "#f0f4ff", lineHeight: 1.5 }}>{qText}</p>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {opts.map((opt, j) => {
+                      const isSel = getAns(part.id, i) !== "" && Number(getAns(part.id, i)) === j;
+                      return (
+                        <div key={j} onClick={() => setAns(part.id, i, j)}
+                          style={{ padding: "9px 14px", borderRadius: 9, cursor: "pointer", fontSize: 13, border: isSel ? `2px solid ${CLR}` : "1px solid rgba(255,255,255,0.07)", background: isSel ? `${CLR}15` : "rgba(255,255,255,0.01)", color: isSel ? "#f0f4ff" : "#8b9bbf", transition: "all .12s", display: "flex", alignItems: "center", gap: 10 }}>
+                          <div style={{ width: 24, height: 24, borderRadius: "50%", flexShrink: 0, background: isSel ? CLR : "rgba(255,255,255,0.06)", color: isSel ? "#fff" : "#8b9bbf", fontWeight: 800, fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", border: isSel ? "none" : "1px solid rgba(255,255,255,0.15)" }}>
+                            {String.fromCharCode(65 + j)}
+                          </div>
+                          {opt}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
 
