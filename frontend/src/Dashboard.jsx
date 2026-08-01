@@ -21,6 +21,7 @@ const LISTENING_MAX = 75;
 const ACC = "var(--accent)";
 
 import BACKEND_URL from "./config/api.js";
+import defaultLessonsData from "./data/lessonsData.json";
 
 async function addUserToFirestore(user) {
   return true;
@@ -436,7 +437,7 @@ export default function Dashboard() {
   const [sideOpen, setSideOpen] = useState(window.innerWidth > 768);
   const [loading, setLoading] = useState(true);
   const [timeBonusClaimed, setTimeBonusClaimed] = useState(false);
-  const [lessons, setLessons] = useState(null);
+  const [lessons, setLessons] = useState(defaultLessonsData);
   const userAddedRef = useRef(false);
   const timerRef = useRef(null);
   const syncTimerRef = useRef(null);
@@ -471,12 +472,16 @@ export default function Dashboard() {
   ];
   // Admin Panel removed from navigation — use admin login to access directly
 
-  // Fetch Lessons
+  // Fetch Lessons (updates lessons if server returns data)
   useEffect(() => {
     fetch(`${BACKEND_URL}/api/lessons`)
       .then(r => r.json())
-      .then(data => setLessons(data))
-      .catch(e => console.error("Failed to load lessons:", e));
+      .then(data => {
+        if (data && (data.LISTENING_TESTS?.length > 0 || data.READING_TESTS?.length > 0)) {
+          setLessons(data);
+        }
+      })
+      .catch(e => console.warn("Using built-in lessons (backend sync pending):", e.message));
   }, []);
 
   // Auth listener

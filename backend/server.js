@@ -20,6 +20,8 @@ import writingRouter from "./routes/writing.js";
 import speakingRouter from "./routes/speaking.js";
 import readingRouter from "./routes/reading.js";
 import listeningRouter from "./routes/listening.js";
+import telegramRouter from "./routes/telegram.js";
+import { initTelegramBot } from "./services/telegramBot.js";
 
 dotenv.config();
 
@@ -131,6 +133,7 @@ app.use("/api/writing", writingRouter);
 app.use("/api/speaking", speakingRouter);
 app.use("/api/reading", readingRouter);
 app.use("/api/listening", listeningRouter);
+app.use("/api/telegram", telegramRouter);
 
 // Helper to check DB readiness
 const isDbConnected = () => mongoose.connection.readyState === 1;
@@ -605,6 +608,7 @@ io.on("connection", (socket) => {
 // ── Start ─────────────────────────────────────────────────────────────────────
 server.listen(PORT, () => {
   console.log(`\n🚀 Server started on: http://localhost:${PORT}`);
+  initTelegramBot();
   if (MONGO_URI) {
     console.log(`📡 Attempting to connect to MongoDB...`);
     connectDB();

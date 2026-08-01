@@ -1,61 +1,108 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile
 } from "firebase/auth";
-import { auth, provider } from "./firebase";
+import { auth } from "./firebase";
 import {
   Mail, Lock, User, ArrowRight, Zap, Loader2,
-  Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft
+  Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft,
+  Sparkles, Shield, BookOpen, Headphones, PenTool, Mic,
+  GraduationCap, Star, Globe, Rocket, Trophy, ChevronRight
 } from "lucide-react";
 import { useProgress } from "./useProgress";
 import "./Login.css";
 import BACKEND_URL from "./config/api.js";
 
+/* ── Floating particles ─────────────────────────────── */
+function Particles() {
+  const particles = Array.from({ length: 12 }, (_, i) => ({
+    id: i,
+    left: `${Math.random() * 100}%`,
+    delay: `${Math.random() * 8}s`,
+    duration: `${6 + Math.random() * 8}s`,
+    size: `${2 + Math.random() * 4}px`,
+    color: i % 3 === 0
+      ? "rgba(99,102,241,0.6)"
+      : i % 3 === 1
+      ? "rgba(139,92,246,0.5)"
+      : "rgba(16,185,129,0.4)",
+  }));
+  return (
+    <>
+      {particles.map(p => (
+        <div
+          key={p.id}
+          className="lp-particle"
+          style={{
+            left: p.left,
+            width: p.size,
+            height: p.size,
+            background: p.color,
+            animationDelay: p.delay,
+            animationDuration: p.duration,
+            bottom: -20,
+          }}
+        />
+      ))}
+    </>
+  );
+}
+
+/* ── Feature badges (ro'yxatdan o'tish sahifasida) ── */
+const FEATURES = [
+  { icon: <BookOpen size={12} />, label: "Reading" },
+  { icon: <Headphones size={12} />, label: "Listening" },
+  { icon: <Mic size={12} />, label: "Speaking" },
+  { icon: <PenTool size={12} />, label: "Writing" },
+  { icon: <Sparkles size={12} />, label: "AI Feedback" },
+  { icon: <Trophy size={12} />, label: "Mock Tests" },
+];
+
+/* ── CEFR level data ─────────────────────────────────── */
+const LEVEL_INFO = {
+  A1: { emoji: "🌱", label: "Boshlang'ich",  color: "#10b981" },
+  A2: { emoji: "🌿", label: "Elementar",     color: "#14b8a6" },
+  B1: { emoji: "🔥", label: "O'rta",         color: "#3b82f6" },
+  B2: { emoji: "⚡", label: "Yuqori o'rta",  color: "#8b5cf6" },
+  C1: { emoji: "🚀", label: "Ilg'or",        color: "#f59e0b" },
+};
+
+/* ─────────────────────────────────────────────────────── */
 export default function Login() {
   const navigate = useNavigate();
   const { updateUsername, setInitialLevel } = useProgress();
 
-  const [isLoginMode, setIsLoginMode] = useState(true);
+  const [isLoginMode, setIsLoginMode] = useState(false);
   const [email, setEmail]             = useState("");
   const [password, setPassword]       = useState("");
   const [username, setUsername]       = useState("");
-  const [level, setLevel]             = useState("A1");
+  const [level, setLevel]             = useState("B1");
   const [loading, setLoading]         = useState(false);
   const [error, setError]             = useState("");
   const [showPwd, setShowPwd]         = useState(false);
   const [checkLoad, setCheckLoad]     = useState(false);
   const [userStatus, setUserStatus]   = useState(null);
+  const [success, setSuccess]         = useState(false);
+  const [mounted, setMounted]         = useState(false);
 
-  // Catch redirect login result on mount
   useEffect(() => {
-    if (!auth) return;
-    getRedirectResult(auth)
-      .then((res) => {
-        if (res?.user) {
-          navigate("/dashboard", { replace: true });
-        }
-      })
-      .catch((err) => {
-        console.error("Google redirect sign-in error:", err);
-        if (err.code !== "auth/popup-closed-by-user") {
-          setError(err.message || "Google sign-in failed. Please try again.");
-        }
-      });
-  }, [navigate]);
+    const t = setTimeout(() => setMounted(true), 50);
+    return () => clearTimeout(t);
+  }, []);
 
+  /* Username availability check */
   useEffect(() => {
     if (isLoginMode) { setUserStatus(null); setError(""); return; }
     if (username.length < 3) { setUserStatus(null); return; }
     const t = setTimeout(async () => {
       setCheckLoad(true);
       try {
-        const r = await fetch(`${BACKEND_URL}/api/auth/check-username?username=${encodeURIComponent(username)}`);
+        const r = await fetch(
+          `${BACKEND_URL}/api/auth/check-username?username=${encodeURIComponent(username)}`
+        );
         setUserStatus(await r.json());
       } catch { setUserStatus({ available: true }); }
       finally { setCheckLoad(false); }
@@ -64,90 +111,49 @@ export default function Login() {
   }, [username, isLoginMode]);
 
   const errMsg = (code) => ({
-    "auth/invalid-credential":   "Incorrect email or password.",
-    "auth/wrong-password":       "The password you entered is incorrect.",
-    "auth/invalid-email":        "Please enter a valid email address.",
-    "auth/weak-password":        "Password must be at least 6 characters.",
-    "auth/email-already-in-use": "This email is already registered.",
-    "auth/user-not-found":       "No account found with this email.",
-    "auth/user-disabled":        "This account has been disabled.",
-  }[code] || "Authentication failed. Please try again.");
+    "auth/invalid-credential":   "Email yoki parol noto'g'ri.",
+    "auth/wrong-password":       "Kiritilgan parol noto'g'ri.",
+    "auth/invalid-email":        "Iltimos, to'g'ri email kiriting.",
+    "auth/weak-password":        "Parol kamida 6 ta belgidan iborat bo'lishi kerak.",
+    "auth/email-already-in-use": "Bu email allaqachon ro'yxatdan o'tgan.",
+    "auth/user-not-found":       "Bu email bilan hisob topilmadi.",
+    "auth/user-disabled":        "Bu hisob o'chirilgan.",
+  }[code] || "Autentifikatsiya xatoligi. Qaytadan urinib ko'ring.");
 
   const handleAuth = async (e) => {
     e.preventDefault();
     if (!email || !password) return;
     setLoading(true); setError("");
     try {
-      // Admin shortcut
       const adminEmails = ["asatillo@admin.com", "xolmirzayevanargiza57@gmail.com"];
       if (adminEmails.includes(email.trim().toLowerCase()) && password.trim() === "a1s2a3t4i5l6l7o8") {
         try { await signInWithEmailAndPassword(auth, email, password); }
         catch (ae) {
-          if (["auth/user-not-found","auth/invalid-credential"].includes(ae.code)) {
+          if (["auth/user-not-found", "auth/invalid-credential"].includes(ae.code)) {
             const c = await createUserWithEmailAndPassword(auth, email, password);
             await updateProfile(c.user, { displayName: "Admin" });
           } else { setError(errMsg(ae.code)); setLoading(false); return; }
         }
-        navigate("/dashboard", { replace: true }); setLoading(false); return;
+        navigate("/admin", { replace: true });
+        setLoading(false); return;
       }
 
       if (isLoginMode) {
         await signInWithEmailAndPassword(auth, email, password);
-        navigate("/dashboard");
+        setSuccess(true);
+        setTimeout(() => navigate("/dashboard"), 1200);
       } else {
-        if (!username) { setError("Please enter a username."); setLoading(false); return; }
-        if (userStatus && !userStatus.available) { setError("Username is taken."); setLoading(false); return; }
+        if (!username) { setError("Iltimos, foydalanuvchi nomini kiriting."); setLoading(false); return; }
+        if (userStatus && !userStatus.available) { setError("Bu nom band. Boshqa nom tanlang."); setLoading(false); return; }
         const c = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(c.user, { displayName: username });
         setInitialLevel(level, username);
         updateUsername(username);
-        navigate("/dashboard");
+        setSuccess(true);
+        setTimeout(() => navigate("/dashboard"), 1200);
       }
     } catch (err) { setError(errMsg(err.code)); }
     finally { setLoading(false); }
-  };
-
-  const handleGoogle = async () => {
-    setLoading(true); setError("");
-    try {
-      if (!auth || !provider) {
-        throw new Error("Firebase Auth is not initialized.");
-      }
-      try {
-        const res = await signInWithPopup(auth, provider);
-        if (res?.user) {
-          navigate("/dashboard", { replace: true });
-        }
-      } catch (popupErr) {
-        console.warn("signInWithPopup error:", popupErr.code, popupErr.message);
-        if (popupErr.code === "auth/popup-closed-by-user") {
-          setError("Google sign-in was cancelled.");
-          return;
-        }
-        if (
-          popupErr.code === "auth/popup-blocked" ||
-          popupErr.code === "auth/cancelled-popup-request"
-        ) {
-          console.log("Popup blocked, attempting signInWithRedirect...");
-          await signInWithRedirect(auth, provider);
-          return;
-        }
-        throw popupErr;
-      }
-    } catch (err) {
-      console.error("Google sign-in failed:", err.code, err.message, err);
-      if (err.code === "auth/unauthorized-domain") {
-        setError("Domain not authorized in Firebase Console (Authentication > Settings > Authorized Domains).");
-      } else if (err.code === "auth/operation-not-allowed") {
-        setError("Google Sign-In is disabled in Firebase Console (Authentication > Sign-in method > Google).");
-      } else if (err.code === "auth/popup-closed-by-user") {
-        setError("Google sign-in was cancelled.");
-      } else if (err.code === "auth/network-request-failed") {
-        setError("Network error. Check your internet connection.");
-      } else {
-        setError(err.message || (err.code ? `Google Auth error (${err.code})` : "Google sign-in failed. Please try again."));
-      }
-    } finally { setLoading(false); }
   };
 
   const switchMode = (mode) => {
@@ -157,156 +163,283 @@ export default function Login() {
 
   return (
     <div className="lp-page">
-      {/* Animated background orbs */}
+      <Particles />
+
+      {/* Orbs */}
       <div className="lp-orb lp-orb-1" />
       <div className="lp-orb lp-orb-2" />
       <div className="lp-orb lp-orb-3" />
 
       {/* Back button */}
-      <button className="lp-back" onClick={() => navigate("/about")}>
-        <ArrowLeft size={15} /> Back
+      <button className="lp-back" onClick={() => navigate("/")}>
+        <ArrowLeft size={15} strokeWidth={2.5} />
+        Orqaga
       </button>
 
       {/* Card */}
       <div className="lp-card">
-        {/* Logo */}
-        <div className="lp-logo">
-          <div className="lp-logo-icon"><Zap size={20} fill="#fff" color="#fff" /></div>
-          <span>CEFR<b>Center</b></span>
+
+        {/* Success overlay */}
+        {success && (
+          <div className="lp-success-overlay">
+            <div style={{
+              width: 80, height: 80, borderRadius: "50%",
+              background: "linear-gradient(135deg, #10b981, #059669)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: "0 0 40px rgba(16,185,129,0.5)",
+              animation: "popIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275)",
+            }}>
+              <CheckCircle2 size={36} color="#fff" strokeWidth={2.5} />
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", marginBottom: 6 }}>
+                {isLoginMode ? "Xush kelibsiz! 🎉" : "Hisob yaratildi! 🚀"}
+              </div>
+              <div style={{ fontSize: 14, color: "rgba(255,255,255,0.5)" }}>
+                Dashboard ga o'tilmoqda...
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 6 }}>
+              {[0,1,2].map(i => (
+                <div key={i} style={{
+                  width: 8, height: 8, borderRadius: "50%",
+                  background: "#10b981",
+                  animation: `dotBounce 1s ease-in-out ${i*0.2}s infinite`,
+                }} />
+              ))}
+            </div>
+            <style>{`
+              @keyframes dotBounce {
+                0%,80%,100% { transform: scale(0.6); opacity: 0.4; }
+                40% { transform: scale(1.2); opacity: 1; }
+              }
+            `}</style>
+          </div>
+        )}
+
+        {/* ── LOGO ── */}
+        <div>
+          <div className="lp-logo">
+            <div className="lp-logo-icon">
+              <Zap size={24} fill="#fff" color="#fff" />
+            </div>
+            <span>CEFR<b>Center</b></span>
+          </div>
         </div>
 
-        {/* Tabs */}
+        {/* ── BADGE ── */}
+        <div className="lp-badge">
+          <GraduationCap size={11} />
+          {isLoginMode ? "Ingliz tilini professional darajada o'rganing" : "10,000+ o'quvchiga qo'shiling"}
+        </div>
+
+        {/* ── TABS ── */}
         <div className="lp-tabs">
-          <button className={`lp-tab${isLoginMode ? " active" : ""}`} onClick={() => switchMode(true)}>Sign In</button>
-          <button className={`lp-tab${!isLoginMode ? " active" : ""}`} onClick={() => switchMode(false)}>Sign Up</button>
+          <button
+            className={`lp-tab${isLoginMode ? " active" : ""}`}
+            onClick={() => switchMode(true)}
+          >
+            <Shield size={15} strokeWidth={2.5} />
+            Kirish
+          </button>
+          <button
+            className={`lp-tab${!isLoginMode ? " active" : ""}`}
+            onClick={() => switchMode(false)}
+          >
+            <Rocket size={15} strokeWidth={2.5} />
+            Ro'yxatdan o'tish
+          </button>
         </div>
 
-        {/* Header */}
+        {/* ── HEADING ── */}
         <div className="lp-head">
-          <h2>{isLoginMode ? "Welcome back 👋" : "Create account"}</h2>
-          <p>{isLoginMode ? "Sign in to continue your learning" : "Join thousands of CEFR learners"}</p>
-        </div>
-
-        {/* Google */}
-        <button className="lp-google" onClick={handleGoogle} disabled={loading}>
-          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" width={18} height={18} />
-          Continue with Google
-        </button>
-
-        <div className="lp-divider"><span>or</span></div>
-
-        {/* Form */}
-        <form onSubmit={handleAuth} className="lp-form">
-          {!isLoginMode && (
+          {isLoginMode ? (
             <>
-              {/* Username */}
-              <div className="lp-field">
-                <label>Username</label>
-                <div className={`lp-inp${userStatus?.available === false ? " err" : userStatus?.available ? " ok" : ""}`}>
-                  <User size={16} className="lp-ico" />
-                  <input
-                    type="text" placeholder="e.g. john_doe"
-                    value={username}
-                    onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g,"").slice(0,15))}
-                    autoComplete="off"
-                  />
-                  <span className="lp-status">
-                    {checkLoad && <Loader2 size={14} className="lp-spin" />}
-                    {!checkLoad && userStatus?.available && <CheckCircle2 size={14} className="ok-ic" />}
-                    {!checkLoad && userStatus?.available === false && <AlertCircle size={14} className="err-ic" />}
-                  </span>
-                </div>
-                {userStatus?.available === false && (
-                  <div className="lp-suggest">
-                    <span>Taken · Try:</span>
-                    {userStatus.suggestions?.map(s => (
-                      <button key={s} type="button" onClick={() => setUsername(s)}>{s}</button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Level */}
-              <div className="lp-field">
-                <label>Your CEFR Level</label>
-                <div className="lp-inp">
-                  <select value={level} onChange={e => setLevel(e.target.value)}>
-                    <option value="A1">A1 — Beginner</option>
-                    <option value="A2">A2 — Elementary</option>
-                    <option value="B1">B1 — Intermediate</option>
-                    <option value="B2">B2 — Upper Intermediate</option>
-                    <option value="C1">C1 — Advanced</option>
-                  </select>
-                </div>
-              </div>
+              <h2>Xush kelibsiz 👋</h2>
+              <p>O'rganishni davom ettiring — har kun yangi yutug'ingiz kutmoqda</p>
+            </>
+          ) : (
+            <>
+              <h2>Hisob yarating ✨</h2>
+              <p>Bir oy ichida CEFR sertifikatiga tayyorlanib oling</p>
             </>
           )}
+        </div>
 
-          {/* Email */}
+        {/* ── REGISTER FEATURES ── */}
+        {!isLoginMode && (
+          <div className="lp-features">
+            {FEATURES.map((f, i) => (
+              <div
+                key={i}
+                className="lp-feature-pill"
+                style={{ animationDelay: `${i * 0.06}s` }}
+              >
+                {f.icon}
+                {f.label}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ── FORM ── */}
+        <form onSubmit={handleAuth} className="lp-form">
+
+          {/* ─ USERNAME (only register) ─ */}
+          {!isLoginMode && (
+            <div className="lp-field">
+              <label>
+                <User size={11} />
+                Foydalanuvchi nomi
+              </label>
+              <div className={`lp-inp${userStatus?.available === false ? " err" : userStatus?.available ? " ok" : ""}`}>
+                <User size={17} className="lp-ico" />
+                <input
+                  type="text"
+                  placeholder="masalan: ali_karimov"
+                  value={username}
+                  onChange={e =>
+                    setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 15))
+                  }
+                  autoComplete="off"
+                />
+                <span className="lp-status">
+                  {checkLoad && <Loader2 size={15} className="lp-spin" color="#6366f1" />}
+                  {!checkLoad && userStatus?.available && <CheckCircle2 size={15} className="ok-ic" />}
+                  {!checkLoad && userStatus?.available === false && <AlertCircle size={15} className="err-ic" />}
+                </span>
+              </div>
+              {userStatus?.available === false && (
+                <div className="lp-suggest">
+                  <span>Band ·</span>
+                  {userStatus.suggestions?.map(s => (
+                    <button key={s} type="button" onClick={() => setUsername(s)}>{s}</button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ─ LEVEL SELECT (only register) ─ */}
+          {!isLoginMode && (
+            <div className="lp-field">
+              <label>
+                <Star size={11} />
+                CEFR darajangizni tanlang
+              </label>
+              <div className="lp-levels">
+                {Object.entries(LEVEL_INFO).map(([code, info]) => (
+                  <button
+                    key={code}
+                    type="button"
+                    className={`lp-level-btn${level === code ? " selected" : ""}`}
+                    onClick={() => setLevel(code)}
+                    style={level === code ? { borderColor: info.color, color: "#fff" } : {}}
+                  >
+                    <span style={{ fontSize: 18, lineHeight: 1 }}>{info.emoji}</span>
+                    <span>{code}</span>
+                    <span className="lp-level-badge">{info.label.split(" ")[0]}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ─ EMAIL ─ */}
           <div className="lp-field">
-            <label>Email</label>
+            <label>
+              <Mail size={11} />
+              Email manzil
+            </label>
             <div className="lp-inp">
-              <Mail size={16} className="lp-ico" />
-              <input type="email" placeholder="your@email.com" value={email} onChange={e => setEmail(e.target.value)} required autoComplete="email" />
+              <Mail size={17} className="lp-ico" />
+              <input
+                type="email"
+                placeholder="siz@email.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+              />
             </div>
           </div>
 
-          {/* Password */}
+          {/* ─ PASSWORD ─ */}
           <div className="lp-field">
-            <label>Password</label>
+            <label>
+              <Lock size={11} />
+              Parol
+            </label>
             <div className="lp-inp">
-              <Lock size={16} className="lp-ico" />
+              <Lock size={17} className="lp-ico" />
               <input
-                type={showPwd ? "text" : "password"} placeholder="••••••••"
-                value={password} onChange={e => setPassword(e.target.value)} required
+                type={showPwd ? "text" : "password"}
+                placeholder="••••••••"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
                 autoComplete={isLoginMode ? "current-password" : "new-password"}
               />
-              <button type="button" className="lp-eye" onClick={() => setShowPwd(!showPwd)}>
-                {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+              <button
+                type="button"
+                className="lp-eye"
+                onClick={() => setShowPwd(!showPwd)}
+              >
+                {showPwd ? <EyeOff size={17} /> : <Eye size={17} />}
               </button>
             </div>
           </div>
 
+          {/* ─ ERROR ─ */}
           {error && (
             <div className="lp-err-box">
-              <AlertCircle size={14} /> {error}
+              <AlertCircle size={15} />
+              {error}
             </div>
           )}
 
+          {/* ─ SUBMIT ─ */}
           <button type="submit" className="lp-submit" disabled={loading}>
             {loading
-              ? <Loader2 size={20} className="lp-spin" />
-              : <>{isLoginMode ? "Sign In" : "Create Account"} <ArrowRight size={16} /></>
+              ? <Loader2 size={22} className="lp-spin" />
+              : (
+                <>
+                  {isLoginMode ? "Kirish" : "Hisob yaratish"}
+                  <ArrowRight size={18} strokeWidth={2.5} />
+                </>
+              )
             }
           </button>
         </form>
 
+        {/* ── SWITCH MODE ── */}
         <p className="lp-switch">
-          {isLoginMode ? "New here?" : "Already have an account?"}
+          {isLoginMode ? "Yangi foydalanuvchimisiz?" : "Hisobingiz bormi?"}
           <button onClick={() => switchMode(!isLoginMode)}>
-            {isLoginMode ? " Create a free account" : " Sign in"}
+            {isLoginMode ? "Bepul hisob yarating →" : "Kirish →"}
           </button>
         </p>
 
-        {/* ── SUPPORT SECTION ── */}
+        {/* ── SUPPORT ── */}
         <div className="lp-support">
           <div className="lp-support-label">
             <span className="lp-support-dot" />
-            Support
+            Qo'llab-quvvatlash • 24/7
           </div>
           <div className="lp-support-phone">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
             </svg>
             +998 95 533 15 28
           </div>
           <a href="tel:+998955331528" className="lp-call-btn">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
             </svg>
-            Call Admin
+            Admin bilan bog'lanish
           </a>
         </div>
+
       </div>
     </div>
   );
