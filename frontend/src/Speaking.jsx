@@ -467,12 +467,14 @@ function RecordPhase({ question, images, pN_main, speakTime, transcript, onDone,
   }, [sec, stopped]);
 
   const handleMicClick = () => {
+    if (stopped) return;
     playTing();
     setStopped(true);
     if (onToggleRec) {
       onToggleRec();
+    } else {
+      onDone?.();
     }
-    onDone?.();
   };
 
   return (
@@ -619,63 +621,36 @@ export default function Speaking({ user, progress, scores, saveScore, addXP, add
   const getQuestions = useCallback(() => {
     if (!selPart) return [];
     
-    // PART 1 SPECIAL LOGIC: 6 questions (3 text, 3 images)
-    if (selPart.part === 1 || selPart.title?.toLowerCase().includes("part 1")) {
-      const qs = selPart.questions || [];
-      return [0, 1, 2, 3, 4, 5].map(i => {
-        const q = qs[i] || { question: "Tell me more about this topic." };
-        let prep = 5;
-        let speak = 30;
-        let img = [];
-
-        const TrafficImg1 = "https://images.unsplash.com/photo-1545147418-40391217e27e?auto=format&fit=crop&q=80&w=1200";
-        const TrafficImg2 = "https://images.unsplash.com/photo-1594910260407-1607f232cc2c?auto=format&fit=crop&q=80&w=1200";
-        const BusImg      = "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&q=80&w=1200";
-
-        if (i === 3) { prep = 10; speak = 45; img = [TrafficImg1, TrafficImg2]; }
-        else if (i === 4) { prep = 5; speak = 30; img = [TrafficImg1]; }
-        else if (i === 5) { prep = 5; speak = 30; img = [BusImg]; }
-
-        return {
-          id: `p1_q${i}`,
-          question: q.question || q,
-          prepTime: prep,
-          speakTime: speak,
-          images: img,
-        };
-      });
-    }
-
     const type = selPart.type;
 
-    if (type === "interview") {
-      return (selPart.questions || []).map(q => ({
-        id: q.id || `q${Math.random()}`,
-        question: q.question,
-        prepTime: 5,
+    if (type === "interview" || (selPart.questions && selPart.questions.length > 0 && !type)) {
+      return (selPart.questions || []).map((q, i) => ({
+        id: q.id || `q_${pIdx}_${i}`,
+        question: typeof q === "string" ? q : (q.question || "Answer the question."),
+        prepTime: q.prepTime || 5,
         speakTime: q.speakTime || 30,
-        images: [],
+        images: q.images || [],
         guidingPoints: q.tips || [],
       }));
     }
 
     if (type === "comparison") {
       return (selPart.questions || []).map((q, i) => ({
-        id: q.id || `cq${i}`,
-        question: q.question,
-        prepTime: 10,
-        speakTime: q.speakTime || 40,
-        images: i === 0 ? (selPart.images || []) : [],
+        id: q.id || `cq_${pIdx}_${i}`,
+        question: typeof q === "string" ? q : (q.question || "Compare the situations shown."),
+        prepTime: q.prepTime || (i === 0 ? 10 : 5),
+        speakTime: q.speakTime || (i === 0 ? 45 : 30),
+        images: i === 0 ? (selPart.images || q.images || []) : (q.images || []),
         guidingPoints: q.tips || [],
       }));
     }
 
     if (type === "long_turn") {
       return [{
-        id: "lt_main",
-        question: selPart.prompt,
-        prepTime: 15,
-        speakTime: selPart.speakTime || 60,
+        id: selPart.id || `lt_${pIdx}`,
+        question: selPart.prompt || "Speak for 2 minutes on the given topic.",
+        prepTime: selPart.prepTime || 60,
+        speakTime: selPart.speakTime || 120,
         images: selPart.images || [],
         guidingPoints: selPart.guidingPoints || [],
       }];
@@ -683,19 +658,36 @@ export default function Speaking({ user, progress, scores, saveScore, addXP, add
 
     if (type === "discussion") {
       return [{
-        id: "disc_main",
-        question: selPart.statement || selPart.prompt,
-        prepTime: 60,
+        id: selPart.id || `disc_${pIdx}`,
+        question: selPart.statement || selPart.prompt || "Discuss the statement.",
+        prepTime: selPart.prepTime || 60,
         speakTime: selPart.speakTime || 120,
-        images: [],
+        images: selPart.images || [],
         guidingPoints: [],
-        argumentsFor: selPart.argumentsFor,
-        argumentsAgainst: selPart.argumentsAgainst,
+        argumentsFor: selPart.argumentsFor || [],
+        argumentsAgainst: selPart.argumentsAgainst || [],
       }];
     }
 
-    return [{ id: "main", question: selPart.prompt || "Speak...", prepTime: 5, speakTime: 60, images: [] }];
-  }, [selPart]);
+    if (Array.isArray(selPart.questions) && selPart.questions.length > 0) {
+      return selPart.questions.map((q, i) => ({
+        id: q.id || `gen_q_${pIdx}_${i}`,
+        question: typeof q === "string" ? q : (q.question || "Speak on the topic."),
+        prepTime: q.prepTime || 5,
+        speakTime: q.speakTime || 30,
+        images: q.images || [],
+        guidingPoints: q.tips || [],
+      }));
+    }
+
+    return [{
+      id: selPart.id || `main_${pIdx}`,
+      question: selPart.prompt || selPart.statement || selPart.description || "Speak about the topic...",
+      prepTime: selPart.prepTime || 5,
+      speakTime: selPart.speakTime || 60,
+      images: selPart.images || []
+    }];
+  }, [selPart, pIdx]);
 
   const questions = getQuestions();
   const curQ      = (questions && questions[qIdx]) || questions[0] || {
@@ -727,14 +719,24 @@ export default function Speaking({ user, progress, scores, saveScore, addXP, add
   // ── Speech recognition ──────────────────────────────────────────────────────
   const stopRecording = useCallback(() => {
     isStoppedRef.current = true;
-    if (recRef.current) { try { recRef.current.stop(); } catch(e) {} recRef.current = null; }
+    if (recRef.current) {
+      const oldRec = recRef.current;
+      recRef.current = null;
+      try {
+        oldRec.onresult = null;
+        oldRec.onerror = null;
+        oldRec.onend = null;
+        oldRec.abort();
+      } catch(e) {}
+    }
     clearTimeout(stopRef.current);
   }, []);
 
   const startRec = useCallback(() => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) { setError("Speech Recognition not supported. Use Chrome or Edge."); return; }
-    if (recRef.current) { try { recRef.current.stop(); } catch(e) {} recRef.current = null; }
+    
+    stopRecording();
 
     updateTranscript("");
     isStoppedRef.current = false;
@@ -743,6 +745,7 @@ export default function Speaking({ user, progress, scores, saveScore, addXP, add
     rec.lang = "en-US"; rec.continuous = true; rec.interimResults = true; rec.maxAlternatives = 1;
 
     rec.onresult = (e) => {
+      if (isStoppedRef.current) return;
       let final = "", interim = "";
       for (let i = 0; i < e.results.length; i++) {
         if (e.results[i].isFinal) final += e.results[i][0].transcript + " ";
@@ -753,28 +756,23 @@ export default function Speaking({ user, progress, scores, saveScore, addXP, add
     };
 
     rec.onerror = (e) => {
+      if (isStoppedRef.current) return;
       if (e.error === "not-allowed") setError("Microphone access denied.");
-      if (e.error === "no-speech" && !isStoppedRef.current && recRef.current) {
+    };
+
+    rec.onend = () => {
+      if (!isStoppedRef.current && recRef.current === rec) {
         try { rec.start(); } catch(err) {}
       }
     };
 
-    rec.onend = () => {
-      if (!isStoppedRef.current && recRef.current) { try { rec.start(); } catch(err) {} }
-    };
-
     recRef.current = rec;
     try { rec.start(); } catch(e) { setError("Failed to start mic. Check permissions."); }
-  }, []);
-
-  // ── User stopped early → save answer for this Q ────────────────────────────
-  const handleStopEarly = useCallback(() => {
-    stopRecording();
-    setAnswers(prev => ({ ...prev, [curQ.id]: transcriptRef.current }));
-  }, [stopRecording, curQ]);
+  }, [stopRecording, updateTranscript]);
 
   // ── Move to next question or end part ──────────────────────────────────────
   const handleQuestionDone = useCallback(() => {
+    stopRecording();
     const saved = { ...answers, [curQ.id]: transcriptRef.current };
     setAnswers(saved);
 
@@ -787,7 +785,11 @@ export default function Speaking({ user, progress, scores, saveScore, addXP, add
       // Part done -> show "Next Part" screen
       setPhase("part_done");
     }
-  }, [qIdx, questions, curQ, answers]);
+  }, [qIdx, questions, curQ, answers, stopRecording, updateTranscript]);
+
+  const handleStopEarly = useCallback(() => {
+    handleQuestionDone();
+  }, [handleQuestionDone]);
 
   const goToNextPart = () => {
     if (pIdx < selTest.parts.length - 1) {
