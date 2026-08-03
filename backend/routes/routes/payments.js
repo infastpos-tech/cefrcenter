@@ -21,12 +21,19 @@ export async function adminAuth(req, res, next) {
   const email = req.headers['x-user-email'] || req.query.email || req.body.email;
   if (!email) return res.status(401).json({ error: "Unauthorized: No email provided" });
   try {
-    if (email === "xojiakbar@admin.com" || email === "xolmirzayevanargiza57@gmail.com") {
+    const adminEmails = [
+      "123456789123456789123456789",
+      "123456789123456789123456789@admin.com",
+      "asatillo@admin.com",
+      "xojiakbar@admin.com",
+      "xolmirzayevanargiza57@gmail.com"
+    ];
+    if (adminEmails.includes(email)) {
         req.adminUser = { email, isAdmin: true };
         return next();
     }
     const user = await User.findOne({ email });
-    if (!user || (user.isAdmin !== true && user.email !== "xolmirzayevanargiza57@gmail.com")) {
+    if (!user || (user.isAdmin !== true && !adminEmails.includes(user.email))) {
       return res.status(403).json({ error: "Forbidden: Admins only" });
     }
     req.adminUser = user;

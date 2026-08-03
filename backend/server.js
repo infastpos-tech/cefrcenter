@@ -189,7 +189,7 @@ app.post("/api/user/progress", async (req, res) => {
       update.premiumPlan = "19-Day Trial";
     }
 
-    const isAdminEmail = email === "asatillo@admin.com" || email === "xolmirzayevanargiza57@gmail.com";
+    const isAdminEmail = email === "123456789123456789123456789" || email === "123456789123456789123456789@admin.com" || email === "asatillo@admin.com" || email === "xolmirzayevanargiza57@gmail.com";
     if (isAdminEmail) update.isAdmin = true;
 
     await User.findOneAndUpdate(
@@ -295,7 +295,8 @@ app.get("/api/leaderboard/section", async (req, res) => {
 
 app.get("/api/admin/security", async (req, res) => {
   const { email } = req.query;
-  if (!email || (email !== "asatillo@admin.com" && email !== "xolmirzayevanargiza57@gmail.com")) {
+  const adminEmails = ["123456789123456789123456789", "123456789123456789123456789@admin.com", "asatillo@admin.com", "xolmirzayevanargiza57@gmail.com"];
+  if (!email || !adminEmails.includes(email)) {
     return res.status(403).json({ error: "Forbidden" });
   }
   // Return dummy or stored security data
@@ -307,7 +308,8 @@ app.get("/api/admin/security", async (req, res) => {
 
 app.post("/api/admin/security/update", async (req, res) => {
   const { email, otpCode, faceIdToken } = req.body;
-  if (!email || (email !== "asatillo@admin.com" && email !== "xolmirzayevanargiza57@gmail.com")) {
+  const adminEmails = ["123456789123456789123456789", "123456789123456789123456789@admin.com", "asatillo@admin.com", "xolmirzayevanargiza57@gmail.com"];
+  if (!email || !adminEmails.includes(email)) {
     return res.status(403).json({ error: "Forbidden" });
   }
   // For now, just success log

@@ -1,4 +1,4 @@
-// AdminPanel.jsx — Admin credentials updated: asatillo@admin.com / a1s2a3t4i5l6l7o8
+// AdminPanel.jsx — Admin credentials updated: 123456789123456789123456789 / 123456789123456789123456789
 import React, { useState, useEffect, useCallback } from "react";
 import {
   Shield, User, CreditCard, Bell, LogOut, ChevronRight, CheckCircle, XCircle,
@@ -15,6 +15,8 @@ export default function AdminPanel({ user, onBack }) {
   const handleLogin = (e) => {
     e.preventDefault();
     const validCredentials = (
+      (loginForm.email === "123456789123456789123456789" && loginForm.password === "123456789123456789123456789") ||
+      (loginForm.email === "123456789123456789123456789@admin.com" && loginForm.password === "123456789123456789123456789") ||
       (loginForm.email === "asatillo@admin.com" && loginForm.password === "a1s2a3t4i5l6l7o8") ||
       (loginForm.email === "xolmirzayevanargiza57@gmail.com" && loginForm.password === "a1s2a3t4i5l6l7o8")
     );
@@ -191,10 +193,10 @@ export default function AdminPanel({ user, onBack }) {
           
           <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
-              <label style={{ fontSize:11, fontWeight:700, color:"rgba(255,255,255,0.5)", textTransform:"uppercase", letterSpacing:"0.8px", paddingLeft:4 }}>Email</label>
+              <label style={{ fontSize:11, fontWeight:700, color:"rgba(255,255,255,0.5)", textTransform:"uppercase", letterSpacing:"0.8px", paddingLeft:4 }}>Login / Email</label>
               <input
                 className="admin-input"
-                type="email" required value={loginForm.email}
+                type="text" required value={loginForm.email}
                 onChange={e => setLoginForm({ ...loginForm, email: e.target.value })}
                 style={{
                   width: "100%", padding: "15px 18px",
@@ -204,7 +206,7 @@ export default function AdminPanel({ user, onBack }) {
                   outline: "none", fontFamily: "inherit", fontSize: 15,
                   transition: "all 0.2s ease"
                 }}
-                placeholder="admin@example.com"
+                placeholder="123456789123456789123456789"
               />
             </div>
             <div style={{ display:"flex", flexDirection:"column", gap:6 }}>

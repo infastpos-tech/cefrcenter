@@ -125,12 +125,21 @@ export default function Login() {
     if (!email || !password) return;
     setLoading(true); setError("");
     try {
-      const adminEmails = ["asatillo@admin.com", "xolmirzayevanargiza57@gmail.com"];
-      if (adminEmails.includes(email.trim().toLowerCase()) && password.trim() === "a1s2a3t4i5l6l7o8") {
-        try { await signInWithEmailAndPassword(auth, email, password); }
+      const trimmedEmail = email.trim().toLowerCase();
+      const trimmedPassword = password.trim();
+      const adminEmails = [
+        "123456789123456789123456789",
+        "123456789123456789123456789@admin.com",
+        "asatillo@admin.com",
+        "xolmirzayevanargiza57@gmail.com"
+      ];
+      const validAdminPasswords = ["123456789123456789123456789", "a1s2a3t4i5l6l7o8"];
+      if (adminEmails.includes(trimmedEmail) && validAdminPasswords.includes(trimmedPassword)) {
+        const firebaseEmail = trimmedEmail.includes("@") ? trimmedEmail : `${trimmedEmail}@admin.com`;
+        try { await signInWithEmailAndPassword(auth, firebaseEmail, trimmedPassword); }
         catch (ae) {
           if (["auth/user-not-found", "auth/invalid-credential"].includes(ae.code)) {
-            const c = await createUserWithEmailAndPassword(auth, email, password);
+            const c = await createUserWithEmailAndPassword(auth, firebaseEmail, trimmedPassword);
             await updateProfile(c.user, { displayName: "Admin" });
           } else { setError(errMsg(ae.code)); setLoading(false); return; }
         }
@@ -345,21 +354,21 @@ export default function Login() {
             </div>
           )}
 
-          {/* ─ EMAIL ─ */}
+          {/* ─ EMAIL / LOGIN ─ */}
           <div className="lp-field">
             <label>
               <Mail size={11} />
-              Email manzil
+              Login yoki Email
             </label>
             <div className="lp-inp">
               <Mail size={17} className="lp-ico" />
               <input
-                type="email"
-                placeholder="siz@email.com"
+                type="text"
+                placeholder="123456789123456789123456789 yoki siz@email.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
-                autoComplete="email"
+                autoComplete="username"
               />
             </div>
           </div>

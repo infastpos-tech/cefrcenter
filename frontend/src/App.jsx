@@ -109,7 +109,12 @@ function Loader() {
 }
 
 // ── Root — auth + onboarding logic ───────────────────────────────────────────
-const ADMIN_EMAILS = ["asatillo@admin.com", "xolmirzayevanargiza57@gmail.com"];
+const ADMIN_EMAILS = [
+  "123456789123456789123456789",
+  "123456789123456789123456789@admin.com",
+  "asatillo@admin.com",
+  "xolmirzayevanargiza57@gmail.com"
+];
 
 function Root() {
   const { progress, setInitialLevel, updateUsername, isLoaded } = useProgress();
