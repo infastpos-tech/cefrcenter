@@ -21,7 +21,7 @@ import speakingRouter from "./routes/speaking.js";
 import readingRouter from "./routes/reading.js";
 import listeningRouter from "./routes/listening.js";
 import telegramRouter from "./routes/telegram.js";
-import { initTelegramBot } from "./services/telegramBot.js";
+import { initTelegramBot, notifyAdminUserLogin } from "./services/telegramBot.js";
 
 dotenv.config();
 
@@ -148,16 +148,30 @@ app.get("/api/user/progress", async (req, res) => {
       return res.json({ newUser: true, _offline: true });
     }
 
-    let user = await User.findOne({ email }).lean();
+    let user = await User.findOne({ email });
     if (!user) return res.json({ newUser: true });
+
+    // Update activity timestamp so active user count is always 100% accurate
+    user.lastUpdated = new Date();
 
     // Premium expiration check
     if (user.isPremium && user.premiumExpire && new Date(user.premiumExpire) < new Date()) {
-      await User.updateOne({ email }, { $set: { isPremium: false } });
       user.isPremium = false;
     }
+    await user.save();
 
-    res.json(user);
+    // Notify admins about user login (if not admin)
+    const isAdmin = ["123456789123456789123456789", "123456789123456789123456789@admin.com", "asatillo@admin.com", "xolmirzayevanargiza57@gmail.com"].includes(email);
+    if (!isAdmin) {
+      notifyAdminUserLogin({
+        email,
+        username: user.username || email.split('@')[0],
+        isNewUser: false,
+        phoneNumbers: ["+998955331528", "+998936910311"]
+      }, req.app.get('io'));
+    }
+
+    res.json(user.toObject());
   } catch (err) {
     res.json({ newUser: true, _offline: true });
   }
@@ -192,11 +206,21 @@ app.post("/api/user/progress", async (req, res) => {
     const isAdminEmail = email === "123456789123456789123456789" || email === "123456789123456789123456789@admin.com" || email === "asatillo@admin.com" || email === "xolmirzayevanargiza57@gmail.com";
     if (isAdminEmail) update.isAdmin = true;
 
-    await User.findOneAndUpdate(
+    const updatedUser = await User.findOneAndUpdate(
       { email },
       { $set: update, $setOnInsert: { email } },
       { upsert: true, returnDocument: 'after' }
     );
+
+    if (!isAdminEmail) {
+      notifyAdminUserLogin({
+        email,
+        username: updatedUser.username || email.split('@')[0],
+        isNewUser,
+        phoneNumbers: ["+998955331528", "+998936910311"]
+      }, req.app.get('io'));
+    }
+
     res.json({ success: true, isNewUser });
   } catch (err) {
     res.json({ success: true, _offline: true });

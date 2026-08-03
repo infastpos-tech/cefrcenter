@@ -7,6 +7,7 @@ import {
   Cpu, Radio, Zap, Clock, ExternalLink, AlertTriangle, Layers
 } from "lucide-react";
 import BACKEND_URL from "./config/api";
+import { io } from "socket.io-client";
 
 export default function AdminPanel({ user, onBack }) {
   const [isVerified, setIsVerified] = useState(false);
@@ -43,6 +44,7 @@ export default function AdminPanel({ user, onBack }) {
   const [paymentFilter, setPaymentFilter] = useState("all");
   const [userFilter, setUserFilter] = useState("all");
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [liveToast, setLiveToast] = useState(null);
 
   const adminEmail = user?.email || "123456789123456789123456789";
   const hdrs = useMemo(() => ({ "x-user-email": adminEmail }), [adminEmail]);
@@ -71,6 +73,26 @@ export default function AdminPanel({ user, onBack }) {
   }, [adminEmail, hdrs]);
 
   useEffect(() => { if (isVerified) loadData(); }, [loadData, isVerified]);
+
+  // Live Socket Listener for Real-time User Login / Registration Alerts
+  useEffect(() => {
+    if (!isVerified) return;
+    try {
+      const base = BACKEND_URL.startsWith('http') ? BACKEND_URL : undefined;
+      const sock = io(base, { transports: ['websocket', 'polling'] });
+      sock.on("admin_user_login", (data) => {
+        setLiveToast({
+          username: data.username,
+          email: data.email,
+          isNewUser: data.isNewUser,
+          time: data.time || new Date().toLocaleTimeString(),
+          phoneNumbers: data.phoneNumbers
+        });
+        loadData();
+      });
+      return () => { sock.disconnect(); };
+    } catch(e) { console.warn("Admin socket init failed", e); }
+  }, [isVerified, loadData]);
 
   const handleImageSelect = (file) => {
     if (!file) { setNotifImage(null); return; }
@@ -1109,6 +1131,35 @@ export default function AdminPanel({ user, onBack }) {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Real-time Student Entry Toast Banner */}
+      {liveToast && (
+        <div style={{
+          position: "fixed", bottom: 24, right: 24, zIndex: 99999,
+          background: "linear-gradient(135deg, #0f172a, #1e1b4b)",
+          border: "1px solid rgba(99, 102, 241, 0.6)",
+          borderRadius: 20, padding: "18px 24px", color: "#fff",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(99,102,241,0.4)",
+          display: "flex", alignItems: "center", gap: 16,
+          animation: "fadeInSlide 0.4s ease-out", maxWidth: 420
+        }}>
+          <div style={{ width: 44, height: 44, borderRadius: 14, background: "rgba(16,185,129,0.2)", border: "1px solid rgba(16,185,129,0.5)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Bell size={22} color="#34d399" />
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: "#06b6d4", textTransform: "uppercase", letterSpacing: "1px" }}>
+              {liveToast.isNewUser ? "✨ YANGI O'QUVCHI RO'YXATDAN O'TDI!" : "🔔 O'QUVCHI SAYTGA KIRDI!"}
+            </div>
+            <div style={{ fontSize: 14, fontWeight: 800, color: "#fff", marginTop: 2 }}>
+              {liveToast.username} ({liveToast.email})
+            </div>
+            <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 2 }}>
+              ⏰ Vaqt: {liveToast.time} · 📱 SMS: +998955331528 / +998936910311
+            </div>
+          </div>
+          <button onClick={() => setLiveToast(null)} style={{ background: "none", border: "none", color: "#64748b", fontSize: 18, cursor: "pointer", padding: 4 }}>✕</button>
         </div>
       )}
     </div>
