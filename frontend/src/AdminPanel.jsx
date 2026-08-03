@@ -417,7 +417,7 @@ export default function AdminPanel({ user, onBack }) {
 
         .cyber-sidebar {
           width: 280px; flex-shrink: 0;
-          background: rgba(15, 23, 42, 0.65);
+          background: rgba(15, 23, 42, 0.75);
           backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
           border-right: 1px solid rgba(255, 255, 255, 0.08);
           padding: 28px 20px; display: flex; flexDirection: column;
@@ -473,39 +473,136 @@ export default function AdminPanel({ user, onBack }) {
           border-color: #6366f1;
           box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
         }
+
+        /* ── Mobile & Tablet Responsiveness ── */
+        @media (max-width: 868px) {
+          .cyber-admin-root {
+            flex-direction: column !important;
+            overflow-y: auto !important;
+          }
+          .cyber-sidebar {
+            width: 100% !important;
+            border-right: none !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+            padding: 14px 16px !important;
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 100 !important;
+          }
+          .cyber-brand-wrap {
+            margin-bottom: 12px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+          }
+          .cyber-nav-list {
+            display: flex !important;
+            flex-direction: row !important;
+            overflow-x: auto !important;
+            gap: 8px !important;
+            padding-bottom: 6px !important;
+            -webkit-overflow-scrolling: touch;
+          }
+          .cyber-nav-list::-webkit-scrollbar { display: none; }
+          .cyber-tab-btn {
+            margin-bottom: 0 !important;
+            white-space: nowrap !important;
+            padding: 10px 14px !important;
+            font-size: 13px !important;
+            flex-shrink: 0 !important;
+          }
+          .cyber-sidebar-footer {
+            display: none !important;
+          }
+          .cyber-mobile-actions {
+            display: flex !important;
+            gap: 8px !important;
+          }
+          .cyber-admin-main {
+            padding: 20px 16px !important;
+            overflow-y: visible !important;
+          }
+          .cyber-header-wrap {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 16px !important;
+            margin-bottom: 24px !important;
+          }
+          .cyber-header-wrap h2 {
+            font-size: 22px !important;
+          }
+          .cyber-search-box {
+            width: 100% !important;
+          }
+          .cyber-card-stat {
+            padding: 18px 16px !important;
+            border-radius: 18px !important;
+          }
+          .cyber-card-stat-val {
+            font-size: 28px !important;
+          }
+          .cyber-pending-item {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 14px !important;
+          }
+          .cyber-pending-btns {
+            display: flex !important;
+            width: 100% !important;
+            justify-content: space-between !important;
+            flex-wrap: wrap !important;
+            gap: 8px !important;
+          }
+          .cyber-pending-btns button {
+            flex: 1 !important;
+            justify-content: center !important;
+          }
+          .cyber-lock-card {
+            padding: 28px 20px !important;
+            margin: 16px !important;
+            border-radius: 22px !important;
+          }
+          .cyber-table-wrap {
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+          }
+        }
       `}</style>
 
       {/* ── SIDEBAR NAVIGATION ── */}
       <aside className="cyber-sidebar">
         {/* Brand header */}
-        <div style={{ marginBottom: 36, paddingLeft: 4 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+        <div className="cyber-brand-wrap">
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{
-              width: 44, height: 44, borderRadius: 14,
+              width: 40, height: 40, borderRadius: 12,
               background: "linear-gradient(135deg, #6366f1, #06b6d4)",
               display: "flex", alignItems: "center", justifyContent: "center",
-              boxShadow: "0 0 20px rgba(99, 102, 241, 0.4)"
+              boxShadow: "0 0 20px rgba(99, 102, 241, 0.4)", flexShrink: 0
             }}>
-              <Zap size={24} color="#fff" />
+              <Zap size={22} color="#fff" />
             </div>
             <div>
-              <h1 style={{ fontSize: 20, fontWeight: 900, letterSpacing: "-0.5px", margin: 0, background: "linear-gradient(135deg, #fff, #94a3b8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              <h1 style={{ fontSize: 18, fontWeight: 900, letterSpacing: "-0.5px", margin: 0, background: "linear-gradient(135deg, #fff, #94a3b8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                 APEX MATRIX
               </h1>
-              <span style={{ fontSize: 11, fontWeight: 700, color: "#06b6d4", letterSpacing: "1px" }}>CONTROL CENTER</span>
+              <span style={{ fontSize: 10, fontWeight: 700, color: "#06b6d4", letterSpacing: "1px" }}>CONTROL CENTER</span>
             </div>
           </div>
-          <div style={{ fontSize: 12, color: "#64748b", display: "flex", alignItems: "center", gap: 6, marginTop: 10, padding: "6px 10px", background: "rgba(255,255,255,0.03)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.05)" }}>
-            <User size={12} color="#6366f1" />
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{adminEmail}</span>
+
+          {/* Quick exit icon for mobile */}
+          <div className="cyber-mobile-actions" style={{ display: "none" }}>
+            <button onClick={loadData} style={{ padding: 8, borderRadius: 10, background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.3)", color: "#a5b4fc", cursor: "pointer" }}>
+              <RefreshCw size={16} className={loading ? "spinSlow" : ""} />
+            </button>
+            <button onClick={onBack} style={{ padding: 8, borderRadius: 10, background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.3)", color: "#f87171", cursor: "pointer" }}>
+              <LogOut size={16} />
+            </button>
           </div>
         </div>
 
         {/* Tab items */}
-        <nav style={{ flex: 1 }}>
-          <div style={{ fontSize: 11, fontWeight: 800, color: "#475569", textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: 12, paddingLeft: 6 }}>
-            Boshqaruv Bo'limlari
-          </div>
+        <nav className="cyber-nav-list" style={{ flex: 1 }}>
           {TABS.map(m => {
             const Icon = m.icon;
             const isActive = tab === m.id;
@@ -515,17 +612,17 @@ export default function AdminPanel({ user, onBack }) {
                 onClick={() => setTab(m.id)}
                 className={`cyber-tab-btn ${isActive ? "active" : ""}`}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <Icon size={18} color={isActive ? "#06b6d4" : "#64748b"} />
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <Icon size={16} color={isActive ? "#06b6d4" : "#64748b"} />
                   <span>{m.label}</span>
                 </div>
                 {m.badge && (
-                  <span style={{ fontSize: 11, fontWeight: 800, color: "#fff", background: "#ef4444", padding: "2px 8px", borderRadius: 99, boxShadow: "0 0 10px rgba(239, 68, 68, 0.5)" }}>
+                  <span style={{ fontSize: 11, fontWeight: 800, color: "#fff", background: "#ef4444", padding: "2px 7px", borderRadius: 99, boxShadow: "0 0 10px rgba(239, 68, 68, 0.5)", marginLeft: 6 }}>
                     {m.badge}
                   </span>
                 )}
                 {m.count !== undefined && !m.badge && (
-                  <span style={{ fontSize: 11, fontWeight: 700, color: isActive ? "#06b6d4" : "#475569" }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: isActive ? "#06b6d4" : "#475569", marginLeft: 6 }}>
                     {m.count}
                   </span>
                 )}
@@ -534,8 +631,8 @@ export default function AdminPanel({ user, onBack }) {
           })}
         </nav>
 
-        {/* Footer controls */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 10, borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 20 }}>
+        {/* Footer controls (Desktop) */}
+        <div className="cyber-sidebar-footer" style={{ display: "flex", flexDirection: "column", gap: 10, borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 20, marginTop: 20 }}>
           <button
             onClick={loadData}
             style={{
@@ -569,25 +666,25 @@ export default function AdminPanel({ user, onBack }) {
       </aside>
 
       {/* ── MAIN CONTENT AREA ── */}
-      <main className="cyber-scroll" style={{ flex: 1, overflowY: "auto", padding: "32px 40px", position: "relative" }}>
+      <main className="cyber-scroll cyber-admin-main" style={{ flex: 1, overflowY: "auto", padding: "32px 40px", position: "relative" }}>
         
         {/* Top bar with search & status */}
-        <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 36, gap: 20 }}>
+        <header className="cyber-header-wrap" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 36, gap: 20 }}>
           <div>
-            <h2 style={{ fontSize: 32, fontWeight: 900, margin: 0, letterSpacing: "-1px" }}>
+            <h2 style={{ fontSize: 28, fontWeight: 900, margin: 0, letterSpacing: "-0.5px" }}>
               {tab === "dashboard" && "Dashboard & Tizim Statistikasi"}
               {tab === "payments" && "Barcha To'lovlar Ro'yxati"}
               {tab === "notifications" && "E'lonlar va Bildirishnomalar"}
               {tab === "users" && "O'quvchilar Boshqaruv Bazasi"}
             </h2>
-            <p style={{ color: "#64748b", fontSize: 14, margin: "6px 0 0 0", fontWeight: 500 }}>
+            <p style={{ color: "#64748b", fontSize: 13, margin: "4px 0 0 0", fontWeight: 500 }}>
               CEFR Center Real-vaqt Apex Boshqaruv Portali
             </p>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
             {/* Live Search */}
-            <div style={{ position: "relative", width: 280 }}>
+            <div className="cyber-search-box" style={{ position: "relative", width: 260 }}>
               <Search size={16} color="#64748b" style={{ position: "absolute", left: 14, top: 14 }} />
               <input
                 className="cyber-search-inp"
@@ -671,7 +768,7 @@ export default function AdminPanel({ user, onBack }) {
                   ) : (
                     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                       {payments.filter(p => p.status === "pending").slice(0, 6).map(p => (
-                        <div key={p._id} style={{ padding: "16px 20px", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+                        <div key={p._id} className="cyber-pending-item" style={{ padding: "16px 20px", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                             <div style={{ width: 42, height: 42, borderRadius: 12, background: "rgba(245, 158, 11, 0.15)", border: "1px solid rgba(245, 158, 11, 0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                               <CreditCard size={20} color="#f59e0b" />
@@ -682,7 +779,7 @@ export default function AdminPanel({ user, onBack }) {
                             </div>
                           </div>
 
-                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <div className="cyber-pending-btns" style={{ display: "flex", alignItems: "center", gap: 10 }}>
                             <button
                               onClick={() => {
                                 if (p.receiptFileUrl) {
@@ -745,7 +842,7 @@ export default function AdminPanel({ user, onBack }) {
                 </div>
 
                 {/* Payments Table */}
-                <div style={{ background: "rgba(15, 23, 42, 0.6)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 24, overflow: "hidden", backdropFilter: "blur(16px)" }}>
+                <div className="cyber-table-wrap" style={{ background: "rgba(15, 23, 42, 0.6)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 24, overflow: "hidden", backdropFilter: "blur(16px)" }}>
                   <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
                     <thead>
                       <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)" }}>
