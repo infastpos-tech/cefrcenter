@@ -148,17 +148,18 @@ app.get("/api/user/progress", async (req, res) => {
       return res.json({ newUser: true, _offline: true });
     }
 
-    let user = await User.findOne({ email });
+    let user = await User.findOneAndUpdate(
+      { email },
+      { $set: { lastUpdated: new Date() } },
+      { new: true }
+    );
     if (!user) return res.json({ newUser: true });
-
-    // Update activity timestamp so active user count is always 100% accurate
-    user.lastUpdated = new Date();
 
     // Premium expiration check
     if (user.isPremium && user.premiumExpire && new Date(user.premiumExpire) < new Date()) {
-      user.isPremium = false;
+      await User.updateOne({ email }, { $set: { isPremium: false } });
+      user = await User.findOne({ email });
     }
-    await user.save();
 
     // Notify admins about user login (if not admin)
     const isAdmin = ["123456789123456789123456789", "123456789123456789123456789@admin.com", "asatillo@admin.com", "xolmirzayevanargiza57@gmail.com"].includes(email);
@@ -166,13 +167,13 @@ app.get("/api/user/progress", async (req, res) => {
       notifyAdminUserLogin({
         email,
         username: user.username || email.split('@')[0],
-        isNewUser: false,
-        phoneNumbers: ["+998955331528", "+998936910311"]
+        isNewUser: false
       }, req.app.get('io'));
     }
 
     res.json(user.toObject());
   } catch (err) {
+    console.error("GET /api/user/progress error:", err.message);
     res.json({ newUser: true, _offline: true });
   }
 });
@@ -192,7 +193,7 @@ app.post("/api/user/progress", async (req, res) => {
 
     const update = { ...data };
     if (photoURL) update.photoURL = photoURL;
-    update.lastUpdated = new Date(); // Update activity timestamp
+    update.lastUpdated = new Date();
 
     // Grant 19 days of premium for new users (Trial)
     if (isNewUser) {
@@ -203,26 +204,26 @@ app.post("/api/user/progress", async (req, res) => {
       update.premiumPlan = "19-Day Trial";
     }
 
-    const isAdminEmail = email === "123456789123456789123456789" || email === "123456789123456789123456789@admin.com" || email === "asatillo@admin.com" || email === "xolmirzayevanargiza57@gmail.com";
+    const isAdminEmail = ["123456789123456789123456789", "123456789123456789123456789@admin.com", "asatillo@admin.com", "xolmirzayevanargiza57@gmail.com"].includes(email);
     if (isAdminEmail) update.isAdmin = true;
 
     const updatedUser = await User.findOneAndUpdate(
       { email },
       { $set: update, $setOnInsert: { email } },
-      { upsert: true, returnDocument: 'after' }
+      { upsert: true, new: true }
     );
 
     if (!isAdminEmail) {
       notifyAdminUserLogin({
         email,
-        username: updatedUser.username || email.split('@')[0],
-        isNewUser,
-        phoneNumbers: ["+998955331528", "+998936910311"]
+        username: updatedUser?.username || email.split('@')[0],
+        isNewUser
       }, req.app.get('io'));
     }
 
     res.json({ success: true, isNewUser });
   } catch (err) {
+    console.error("POST /api/user/progress error:", err.message);
     res.json({ success: true, _offline: true });
   }
 });
