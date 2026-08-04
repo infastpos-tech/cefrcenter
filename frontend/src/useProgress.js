@@ -32,6 +32,16 @@ function today() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 }
+
+function getGuestEmail() {
+  const GK = "cefr_guest_id_v2";
+  let gid = localStorage.getItem(GK);
+  if (!gid) {
+    gid = `guest_${Date.now().toString(36)}_${Math.floor(Math.random()*1000)}@cefr.center`;
+    localStorage.setItem(GK, gid);
+  }
+  return gid;
+}
 function rd(k, fb) { try { const r = localStorage.getItem(k); return r ? JSON.parse(r) : fb; } catch { return fb; } }
 function wr(k, v)  { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
 
@@ -89,11 +99,11 @@ export const DEF = {
 
 // ─── Sync entire state to MongoDB ────────────────────────────────────────────
 async function syncToMongoDB(progress, scores, email) {
-  if (!email) return;
+  const targetEmail = email || getGuestEmail();
   try {
     const payload = {
-      email,
-      username:         progress.username         ?? "",
+      email: targetEmail,
+      username:         progress.username || (targetEmail.includes("guest_") ? `Mehmon #${targetEmail.slice(6, 12)}` : targetEmail.split('@')[0]),
       xp:               progress.xp               ?? 0,
       level:            progress.level             ?? "A1",
       completed:        progress.completed         ?? {},
@@ -212,9 +222,10 @@ export function useProgress() {
         isReady.current = false;
         fetchFromCloud(user.email);
       } else {
-        emailRef.current = null;
-        isReady.current = true;
-        setIsLoaded(true);
+        const guestEmail = getGuestEmail();
+        emailRef.current = guestEmail;
+        isReady.current = false;
+        fetchFromCloud(guestEmail);
       }
     });
     return unsub;

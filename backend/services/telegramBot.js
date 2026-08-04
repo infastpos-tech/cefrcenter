@@ -43,6 +43,18 @@ export function initTelegramBot() {
     console.log("🤖 Telegram Bot muvaffaqiyatli ishga tushdi!");
     console.log(`📌 Bildirishnomalar olish uchun Botga /start yozing!`);
 
+    // Auto-register ANY incoming message chat ID as admin notification recipient
+    botInstance.on("message", (msg) => {
+      if (msg && msg.chat && msg.chat.id) {
+        const chatId = msg.chat.id;
+        if (!adminChatIds.includes(chatId)) {
+          adminChatIds.push(chatId);
+          saveAdminChatIds(adminChatIds);
+          console.log(`✅ Admin Chat ID avtomatik saqlandi: ${chatId}`);
+        }
+      }
+    });
+
     // /start command — auto registers chat as admin notification target
     botInstance.onText(/\/start/, (msg) => {
       const chatId = msg.chat.id;
