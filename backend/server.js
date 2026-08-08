@@ -375,6 +375,55 @@ app.get("/api/admin/stats", async (req, res) => {
   }
 });
 
+// ── Admin: Per-Skill Activity Feed ──────────────────────────────────────────
+app.get("/api/admin/activity", async (req, res) => {
+  try {
+    if (!isDbConnected()) {
+      return res.json({ listening: [], reading: [], writing: [], speaking: [], totalVisitors: 0, _offline: true });
+    }
+
+    // Fetch all users with scores
+    const allUsers = await User.find({}, {
+      email: 1, username: 1, scores: 1, _scoreTimestamps: 1, lastUpdated: 1, xp: 1, level: 1
+    }).lean();
+
+    const totalVisitors = allUsers.length;
+
+    const buildList = (prefix) => allUsers
+      .filter(u => {
+        const s = u.scores || {};
+        return Object.keys(s).some(k => k.toLowerCase().startsWith(prefix));
+      })
+      .map(u => {
+        const s = u.scores || {};
+        const ts = u._scoreTimestamps || {};
+        const keys = Object.keys(s).filter(k => k.toLowerCase().startsWith(prefix));
+        const latestTs = keys.map(k => ts[k] || "").filter(Boolean).sort().pop() || "";
+        const score = keys.reduce((acc, k) => acc + (s[k] || 0), 0);
+        return {
+          email: u.email || "guest",
+          username: u.username || u.email?.split("@")[0] || "Mehmon",
+          score,
+          lastActive: latestTs || (u.lastUpdated ? new Date(u.lastUpdated).toISOString() : ""),
+          level: u.level || "A1",
+          xp: u.xp || 0
+        };
+      })
+      .sort((a, b) => (b.lastActive > a.lastActive ? 1 : -1));
+
+    res.json({
+      totalVisitors,
+      listening: buildList("listening"),
+      reading: buildList("reading"),
+      writing: buildList("writing"),
+      speaking: buildList("speaking"),
+    });
+  } catch (err) {
+    console.error("Admin activity error:", err.message);
+    res.json({ listening: [], reading: [], writing: [], speaking: [], totalVisitors: 0 });
+  }
+});
+
 app.get("/api/auth/check-username", async (req, res) => {
   try {
     const { username } = req.query;

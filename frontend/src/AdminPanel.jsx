@@ -34,6 +34,8 @@ export default function AdminPanel({ user, onBack }) {
   const [payments, setPayments] = useState([]);
   const [users, setUsers] = useState([]);
   const [stats, setStats] = useState({ totalUsers: 0, recentUsers: 0, dbStatus: "connected" });
+  const [activity, setActivity] = useState({ listening: [], reading: [], writing: [], speaking: [], totalVisitors: 0 });
+  const [activitySection, setActivitySection] = useState("listening");
   const [notifs, setNotifs] = useState([]);
   const [showNotifModal, setShowNotifModal] = useState(false);
   const [notifForm, setNotifForm] = useState({ title: '', message: '', pinned: false, type: 'info' });
@@ -58,16 +60,18 @@ export default function AdminPanel({ user, onBack }) {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [pRes, uRes, sRes, nRes] = await Promise.all([
+      const [pRes, uRes, sRes, nRes, aRes] = await Promise.all([
         fetch(`${BACKEND_URL}/api/payments/admin/list`, { headers: hdrs }),
         fetch(`${BACKEND_URL}/api/payments/admin/users`, { headers: hdrs }),
         fetch(`${BACKEND_URL}/api/admin/stats?email=${adminEmail}`),
         fetch(`${BACKEND_URL}/api/notifications`, { headers: hdrs }),
+        fetch(`${BACKEND_URL}/api/admin/activity`),
       ]);
       if (pRes.ok) setPayments(await pRes.json());
       if (uRes.ok) setUsers(await uRes.json());
       if (sRes.ok) setStats(await sRes.json());
       if (nRes.ok) setNotifs(await nRes.json());
+      if (aRes.ok) setActivity(await aRes.json());
     } catch (e) { console.error("Load failed", e); }
     finally { setLoading(false); }
   }, [adminEmail, hdrs]);
@@ -398,6 +402,7 @@ export default function AdminPanel({ user, onBack }) {
 
   const TABS = [
     { id: "dashboard", label: "Dashboard Hub", icon: Cpu, badge: pendingPaymentsCount > 0 ? pendingPaymentsCount : null },
+    { id: "activity", label: "Faoliyat Hisoboti", icon: Activity, count: activity.totalVisitors },
     { id: "payments", label: "To'lovlar Ro'yxati", icon: CreditCard, count: payments.length },
     { id: "notifications", label: "E'lonlar Portali", icon: Radio, count: notifs.length },
     { id: "users", label: "O'quvchilar Bazasi", icon: Users, count: users.length },
@@ -695,6 +700,7 @@ export default function AdminPanel({ user, onBack }) {
           <div>
             <h2 style={{ fontSize: 28, fontWeight: 900, margin: 0, letterSpacing: "-0.5px" }}>
               {tab === "dashboard" && "Dashboard & Tizim Statistikasi"}
+              {tab === "activity" && "Faoliyat Hisoboti — Kim Nima Ishlagan"}
               {tab === "payments" && "Barcha To'lovlar Ro'yxati"}
               {tab === "notifications" && "E'lonlar va Bildirishnomalar"}
               {tab === "users" && "O'quvchilar Boshqaruv Bazasi"}
@@ -741,13 +747,14 @@ export default function AdminPanel({ user, onBack }) {
             {/* ── TAB 1: DASHBOARD ── */}
             {tab === "dashboard" && (
               <div>
-                {/* 4 Stats Grid */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 20, marginBottom: 36 }}>
+                {/* 5 Stats Grid */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16, marginBottom: 36 }}>
                   {[
-                    { label: "Jami O'quvchilar", value: stats.totalUsers || users.length, icon: Users, color: "#6366f1", trend: "+12.4% bu oy" },
+                    { label: "Jami Foydalanuvchilar", value: activity.totalVisitors || stats.totalUsers || users.length, icon: Users, color: "#6366f1", trend: "Saytga kirganlar" },
                     { label: "Bugun Faol Bo'lganlar", value: stats.recentUsers, icon: Activity, color: "#06b6d4", trend: "Real-vaqt monitoring" },
-                    { label: "Kutilayotgan To'lovlar", value: pendingPaymentsCount, icon: CreditCard, color: "#f59e0b", alert: pendingPaymentsCount > 0 },
-                    { label: "Yuborilgan E'lonlar", value: notifs.length, icon: Radio, color: "#ec4899", trend: "Barchasi faol" },
+                    { label: "Listening Ishlagan", value: activity.listening?.length || 0, icon: Zap, color: "#10b981", trend: "Tinglab test topshirdi" },
+                    { label: "Reading Ishlagan", value: activity.reading?.length || 0, icon: Layers, color: "#f59e0b", trend: "O'qib test topshirdi" },
+                    { label: "Kutilayotgan To'lovlar", value: pendingPaymentsCount, icon: CreditCard, color: "#ec4899", alert: pendingPaymentsCount > 0 },
                   ].map((s, i) => {
                     const Icon = s.icon;
                     return (
@@ -841,7 +848,109 @@ export default function AdminPanel({ user, onBack }) {
               </div>
             )}
 
-            {/* ── TAB 2: PAYMENTS ── */}
+            {/* ── TAB 2: FAOLIYAT HISOBOTI ── */}
+            {tab === "activity" && (() => {
+              const sectionConfig = {
+                listening: { label: "🎧 Listening", color: "#10b981", desc: "Listening testlarini topshirganlar" },
+                reading:   { label: "📖 Reading",   color: "#6366f1", desc: "Reading testlarini topshirganlar" },
+                writing:   { label: "✍️ Writing",   color: "#f59e0b", desc: "Writing topshirganlar" },
+                speaking:  { label: "🎤 Speaking",  color: "#ec4899", desc: "Speaking testlarini topshirganlar" },
+              };
+              const sKeys = Object.keys(sectionConfig);
+              const currentList = activity[activitySection] || [];
+              const cfg = sectionConfig[activitySection];
+              return (
+                <div>
+                  {/* Summary Cards */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14, marginBottom: 28 }}>
+                    <div style={{ background: "rgba(15,23,42,0.7)", border: "1px solid rgba(99,102,241,0.25)", borderRadius: 18, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 6 }}>
+                      <span style={{ fontSize: 12, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.8px" }}>Jami Kirganlar</span>
+                      <span style={{ fontSize: 34, fontWeight: 900, color: "#6366f1" }}>{activity.totalVisitors || 0}</span>
+                      <span style={{ fontSize: 12, color: "#10b981", fontWeight: 600 }}>↑ Barcha foydalanuvchilar</span>
+                    </div>
+                    {sKeys.map(k => (
+                      <div key={k} style={{ background: "rgba(15,23,42,0.7)", border: `1px solid ${sectionConfig[k].color}25`, borderRadius: 18, padding: "18px 20px", cursor: "pointer", transition: "all 0.2s", outline: activitySection === k ? `2px solid ${sectionConfig[k].color}` : "none" }}
+                        onClick={() => setActivitySection(k)}>
+                        <div style={{ fontSize: 12, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.8px" }}>{sectionConfig[k].label}</div>
+                        <div style={{ fontSize: 34, fontWeight: 900, color: sectionConfig[k].color, marginTop: 4 }}>{(activity[k] || []).length}</div>
+                        <div style={{ fontSize: 12, color: sectionConfig[k].color, fontWeight: 600, marginTop: 2, opacity: 0.8 }}>kishi topshirdi</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Section Switcher */}
+                  <div style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
+                    {sKeys.map(k => (
+                      <button key={k} onClick={() => setActivitySection(k)} style={{
+                        padding: "9px 18px", borderRadius: 12, fontWeight: 700, fontSize: 13, cursor: "pointer", transition: "all 0.2s",
+                        background: activitySection === k ? `${sectionConfig[k].color}22` : "rgba(15,23,42,0.6)",
+                        border: `1px solid ${activitySection === k ? sectionConfig[k].color : "rgba(255,255,255,0.08)"}`,
+                        color: activitySection === k ? sectionConfig[k].color : "#94a3b8"
+                      }}>{sectionConfig[k].label}</button>
+                    ))}
+                  </div>
+
+                  {/* Table */}
+                  <div style={{ background: "rgba(15,23,42,0.65)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 22, overflow: "hidden", backdropFilter: "blur(16px)" }}>
+                    <div style={{ padding: "20px 24px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div>
+                        <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "#fff" }}>{cfg.label} — Ro'yxat</h3>
+                        <p style={{ margin: "4px 0 0", fontSize: 13, color: "#64748b" }}>{cfg.desc} · {currentList.length} kishi</p>
+                      </div>
+                      <div style={{ padding: "6px 14px", background: `${cfg.color}18`, border: `1px solid ${cfg.color}40`, borderRadius: 10, fontSize: 13, fontWeight: 700, color: cfg.color }}>
+                        {currentList.length} ta
+                      </div>
+                    </div>
+
+                    {currentList.length === 0 ? (
+                      <div style={{ padding: "60px 24px", textAlign: "center", color: "#64748b" }}>
+                        <div style={{ fontSize: 40, marginBottom: 12 }}>📭</div>
+                        <p style={{ margin: 0, fontWeight: 600 }}>Hali hech kim {sectionConfig[activitySection].label} testini topshirmagan</p>
+                      </div>
+                    ) : (
+                      <div style={{ overflowX: "auto" }}>
+                        <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                          <thead>
+                            <tr style={{ background: "rgba(255,255,255,0.03)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                              {["#", "Foydalanuvchi", "Email", "Daraja", "Ball", "Oxirgi faollik"].map((h, i) => (
+                                <th key={i} style={{ padding: "14px 18px", fontSize: 11, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.8px" }}>{h}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {currentList.map((u, idx) => (
+                              <tr key={idx} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)", transition: "background 0.15s" }}
+                                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.03)"}
+                                onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                                <td style={{ padding: "14px 18px", fontSize: 13, color: "#64748b", fontWeight: 700 }}>{idx + 1}</td>
+                                <td style={{ padding: "14px 18px" }}>
+                                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                    <div style={{ width: 34, height: 34, borderRadius: 10, background: `${cfg.color}18`, border: `1px solid ${cfg.color}30`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                      <span style={{ fontSize: 14, fontWeight: 800, color: cfg.color }}>{(u.username || "?")[0].toUpperCase()}</span>
+                                    </div>
+                                    <span style={{ fontWeight: 700, color: "#f1f5f9", fontSize: 14 }}>{u.username || "Mehmon"}</span>
+                                  </div>
+                                </td>
+                                <td style={{ padding: "14px 18px", fontSize: 13, color: "#94a3b8" }}>{u.email}</td>
+                                <td style={{ padding: "14px 18px" }}>
+                                  <span style={{ padding: "4px 10px", borderRadius: 8, fontSize: 12, fontWeight: 700, background: `${cfg.color}18`, color: cfg.color }}>{u.level || "A1"}</span>
+                                </td>
+                                <td style={{ padding: "14px 18px", fontSize: 14, fontWeight: 800, color: "#fff" }}>{u.score || 0}</td>
+                                <td style={{ padding: "14px 18px", fontSize: 12, color: "#64748b" }}>
+                                  {u.lastActive ? new Date(u.lastActive).toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* ── TAB 3: PAYMENTS ── */}
             {tab === "payments" && (
               <div>
                 {/* Filter bar */}
