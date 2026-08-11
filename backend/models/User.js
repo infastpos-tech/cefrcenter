@@ -3,6 +3,11 @@ import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   username: { type: String, sparse: true, unique: true },
+  name: { type: String, default: "" },              // Display name
+  phone: { type: String, default: "" },             // Phone number
+  role: { type: String, enum: ["user", "admin"], default: "user" },
+  isOnline: { type: Boolean, default: false },      // Online/offline status
+  registeredAt: { type: Date, default: null },       // First registration date
   xp: { type: Number, default: 0 },
   coins: { type: Number, default: 0 },
   level: { type: String, default: "A1" },
@@ -36,12 +41,16 @@ const userSchema = new mongoose.Schema({
   premiumExpire: { type: Date, default: null },
   isAdmin: { type: Boolean, default: false },
   photoURL: { type: String, default: "" }
+}, {
+  timestamps: true  // adds createdAt and updatedAt automatically
 });
 
 userSchema.index({ xp: -1 });
 userSchema.index({ consecutiveDays: -1 });
 userSchema.index({ isHidden: 1, xp: -1 });
 userSchema.index({ isHidden: 1, consecutiveDays: -1 });
+userSchema.index({ isOnline: 1 });
+userSchema.index({ createdAt: -1 });
 
 const User = mongoose.model("User", userSchema);
 export default User;

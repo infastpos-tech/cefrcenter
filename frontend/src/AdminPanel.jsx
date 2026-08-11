@@ -33,7 +33,7 @@ export default function AdminPanel({ user, onBack }) {
   const [tab, setTab] = useState("dashboard");
   const [payments, setPayments] = useState([]);
   const [users, setUsers] = useState([]);
-  const [stats, setStats] = useState({ totalUsers: 0, recentUsers: 0, dbStatus: "connected" });
+  const [stats, setStats] = useState({ totalUsers: 0, recentUsers: 0, onlineUsers: 0, offlineUsers: 0, newToday: 0, dbStatus: "connected" });
   const [activity, setActivity] = useState({ listening: [], reading: [], writing: [], speaking: [], totalVisitors: 0 });
   const [activitySection, setActivitySection] = useState("listening");
   const [notifs, setNotifs] = useState([]);
@@ -45,6 +45,8 @@ export default function AdminPanel({ user, onBack }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [paymentFilter, setPaymentFilter] = useState("all");
   const [userFilter, setUserFilter] = useState("all");
+  const [userSort, setUserSort] = useState("newest");
+  const [selectedUser, setSelectedUser] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [liveToast, setLiveToast] = useState(null);
 
@@ -1092,52 +1094,193 @@ export default function AdminPanel({ user, onBack }) {
               </div>
             )}
 
-            {/* ── TAB 4: STUDENTS DIRECTORY ── */}
-            {tab === "users" && (
-              <div>
-                {/* User filters */}
-                <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
-                  <button
-                    onClick={() => setUserFilter("all")}
-                    style={{
-                      padding: "8px 16px", borderRadius: 12,
-                      background: userFilter === "all" ? "rgba(99, 102, 241, 0.2)" : "rgba(15, 23, 42, 0.6)",
-                      border: `1px solid ${userFilter === "all" ? "rgba(99, 102, 241, 0.5)" : "rgba(255, 255, 255, 0.08)"}`,
-                      color: userFilter === "all" ? "#fff" : "#94a3b8", fontWeight: 700, cursor: "pointer", fontSize: 13
-                    }}
-                  >
-                    Barcha O'quvchilar ({users.length})
-                  </button>
-                  <button
-                    onClick={() => setUserFilter("premium")}
-                    style={{
-                      padding: "8px 16px", borderRadius: 12,
-                      background: userFilter === "premium" ? "rgba(16, 185, 129, 0.2)" : "rgba(15, 23, 42, 0.6)",
-                      border: `1px solid ${userFilter === "premium" ? "rgba(16, 185, 129, 0.5)" : "rgba(255, 255, 255, 0.08)"}`,
-                      color: userFilter === "premium" ? "#34d399" : "#94a3b8", fontWeight: 700, cursor: "pointer", fontSize: 13
-                    }}
-                  >
-                    ⭐ Premium O'quvchilar ({users.filter(u => u.isPremium).length})
-                  </button>
-                </div>
+            {/* ── TAB 4: USERS MANAGEMENT ── */}
+            {tab === "users" && (() => {
+              // Client-side filter on top of server-side search
+              const filteredU = users.filter(u => {
+                const q = searchQuery.toLowerCase();
+                const matchSearch = !q ||
+                  (u.email || "").toLowerCase().includes(q) ||
+                  (u.name || "").toLowerCase().includes(q) ||
+                  (u.username || "").toLowerCase().includes(q) ||
+                  (u.phone || "").toLowerCase().includes(q);
+                const matchFilter =
+                  userFilter === "all" ? true :
+                  userFilter === "online" ? u.isOnline :
+                  userFilter === "offline" ? !u.isOnline :
+                  userFilter === "premium" ? u.isPremium :
+                  userFilter === "admin" ? u.isAdmin : true;
+                return matchSearch && matchFilter;
+              });
 
-                {/* User Grid */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 18 }}>
-                  {filteredUsers.length === 0 ? (
-                    <p style={{ color: "#64748b", gridColumn: "1 / -1" }}>O'quvchilar topilmadi.</p>
-                  ) : filteredUsers.map(u => (
-                    <div key={u.email} style={{ background: "rgba(15, 23, 42, 0.6)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 20, padding: 20, display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 16, backdropFilter: "blur(16px)" }}>
-                      <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
-                        <div style={{ width: 48, height: 48, borderRadius: "50%", background: u.isPremium ? "linear-gradient(135deg, #f59e0b, #d97706)" : "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                          <User size={22} color={u.isPremium ? "#fff" : "#94a3b8"} />
+              const fmt = (dt) => dt
+                ? new Date(dt).toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })
+                : "—";
+
+              return (
+                <div>
+                  {/* Stats row */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 14, marginBottom: 24 }}>
+                    {[
+                      { label: "Jami", value: stats.totalUsers || users.length, color: "#6366f1" },
+                      { label: "Online", value: stats.onlineUsers || users.filter(u=>u.isOnline).length, color: "#10b981" },
+                      { label: "Offline", value: stats.offlineUsers || users.filter(u=>!u.isOnline).length, color: "#64748b" },
+                      { label: "Bugun Yangi", value: stats.newToday || 0, color: "#f59e0b" },
+                      { label: "Premium", value: users.filter(u=>u.isPremium).length, color: "#ec4899" },
+                    ].map((s, i) => (
+                      <div key={i} style={{ background: "rgba(15,23,42,0.7)", border: `1px solid ${s.color}20`, borderRadius: 16, padding: "16px 18px" }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.7px", marginBottom: 6 }}>{s.label}</div>
+                        <div style={{ fontSize: 30, fontWeight: 900, color: s.color }}>{s.value}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Filter buttons */}
+                  <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+                    {[
+                      { key: "all", label: "Hammasi" },
+                      { key: "online", label: "🟢 Online" },
+                      { key: "offline", label: "⚪ Offline" },
+                      { key: "premium", label: "⭐ Premium" },
+                      { key: "admin", label: "🛡 Admin" },
+                    ].map(f => (
+                      <button key={f.key} onClick={() => setUserFilter(f.key)} style={{
+                        padding: "7px 14px", borderRadius: 10, fontSize: 12, fontWeight: 700, cursor: "pointer", transition: "all 0.15s",
+                        background: userFilter === f.key ? "rgba(99,102,241,0.2)" : "rgba(15,23,42,0.7)",
+                        border: `1px solid ${userFilter === f.key ? "rgba(99,102,241,0.5)" : "rgba(255,255,255,0.08)"}`,
+                        color: userFilter === f.key ? "#fff" : "#64748b",
+                      }}>{f.label}</button>
+                    ))}
+                    <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }}>
+                      <span style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>Saralash:</span>
+                      <select value={userSort} onChange={e => setUserSort(e.target.value)} style={{ padding: "7px 12px", borderRadius: 10, background: "rgba(15,23,42,0.8)", border: "1px solid rgba(255,255,255,0.1)", color: "#e2e8f0", fontSize: 12, fontWeight: 600 }}>
+                        <option value="newest">Eng yangi</option>
+                        <option value="oldest">Eng eski</option>
+                        <option value="xp">XP bo'yicha</option>
+                        <option value="name">Ism bo'yicha</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Table */}
+                  <div style={{ background: "rgba(15,23,42,0.65)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 20, overflow: "hidden", backdropFilter: "blur(16px)" }}>
+                    {/* Table header */}
+                    <div style={{ padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: "#64748b" }}>{filteredU.length} ta foydalanuvchi</span>
+                    </div>
+
+                    {filteredU.length === 0 ? (
+                      <div style={{ padding: "60px 24px", textAlign: "center", color: "#64748b" }}>
+                        <div style={{ fontSize: 36, marginBottom: 12 }}>👤</div>
+                        <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>No users yet</div>
+                        <div style={{ fontSize: 13 }}>Hali hech kim ro'yxatdan o'tmagan</div>
+                      </div>
+                    ) : (
+                      <div style={{ overflowX: "auto" }}>
+                        <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                          <thead>
+                            <tr style={{ background: "rgba(255,255,255,0.02)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                              {["#", "Foydalanuvchi", "Email", "Telefon", "Status", "Ro'yxat sanasi", "Oxirgi kirish"].map((h, i) => (
+                                <th key={i} style={{ padding: "12px 16px", fontSize: 10, fontWeight: 800, color: "#475569", textTransform: "uppercase", letterSpacing: "0.8px", whiteSpace: "nowrap" }}>{h}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {filteredU.map((u, idx) => (
+                              <tr key={u._id || u.email}
+                                onClick={() => setSelectedUser(u)}
+                                style={{ borderBottom: "1px solid rgba(255,255,255,0.04)", cursor: "pointer", transition: "background 0.15s" }}
+                                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.025)"}
+                                onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                                <td style={{ padding: "12px 16px", fontSize: 12, color: "#475569", fontWeight: 700 }}>{idx + 1}</td>
+                                <td style={{ padding: "12px 16px" }}>
+                                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                    <div style={{ width: 36, height: 36, borderRadius: 10, background: u.isPremium ? "linear-gradient(135deg,#f59e0b,#d97706)" : "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 14, fontWeight: 800, color: u.isPremium ? "#fff" : "#94a3b8" }}>
+                                      {(u.displayName || u.name || u.username || "?")[0].toUpperCase()}
+                                    </div>
+                                    <div>
+                                      <div style={{ fontWeight: 700, color: "#f1f5f9", fontSize: 13 }}>{u.displayName || u.name || u.username || "—"}</div>
+                                      <div style={{ fontSize: 11, color: "#64748b", marginTop: 1 }}>
+                                        {u.isAdmin && <span style={{ color: "#6366f1", fontWeight: 700 }}>ADMIN · </span>}
+                                        {u.isPremium && <span style={{ color: "#f59e0b", fontWeight: 700 }}>⭐ PREMIUM · </span>}
+                                        {u.level || "A1"} · {u.xp || 0} XP
+                                      </div>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td style={{ padding: "12px 16px", fontSize: 12, color: "#94a3b8" }}>{u.email}</td>
+                                <td style={{ padding: "12px 16px", fontSize: 12, color: "#94a3b8" }}>{u.phone || "—"}</td>
+                                <td style={{ padding: "12px 16px" }}>
+                                  <span style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 700, color: u.isOnline ? "#10b981" : "#475569" }}>
+                                    <span style={{ width: 7, height: 7, borderRadius: "50%", background: u.isOnline ? "#10b981" : "#475569", display: "inline-block" }} />
+                                    {u.isOnline ? "Online" : "Offline"}
+                                  </span>
+                                </td>
+                                <td style={{ padding: "12px 16px", fontSize: 11, color: "#64748b", whiteSpace: "nowrap" }}>{fmt(u.registeredAt || u.createdAt)}</td>
+                                <td style={{ padding: "12px 16px", fontSize: 11, color: "#64748b", whiteSpace: "nowrap" }}>{fmt(u.lastLogin || u.lastUpdated)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* User Detail Modal */}
+                  {selectedUser && (
+                    <div onClick={() => setSelectedUser(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(12px)", zIndex: 20000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+                      <div onClick={e => e.stopPropagation()} style={{ width: "100%", maxWidth: 520, background: "#0f172a", borderRadius: 24, border: "1px solid rgba(255,255,255,0.12)", padding: 32, boxShadow: "0 30px 80px rgba(0,0,0,0.8)" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
+                          <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
+                            <div style={{ width: 56, height: 56, borderRadius: 16, background: selectedUser.isPremium ? "linear-gradient(135deg,#f59e0b,#d97706)" : "rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, fontWeight: 900, color: selectedUser.isPremium ? "#fff" : "#94a3b8" }}>
+                              {(selectedUser.displayName || "?")[0].toUpperCase()}
+                            </div>
+                            <div>
+                              <div style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}>{selectedUser.displayName || selectedUser.name || selectedUser.username || "—"}</div>
+                              <div style={{ fontSize: 12, color: "#64748b", marginTop: 2, display: "flex", gap: 8, alignItems: "center" }}>
+                                <span style={{ width: 7, height: 7, borderRadius: "50%", background: selectedUser.isOnline ? "#10b981" : "#475569", display: "inline-block" }} />
+                                {selectedUser.isOnline ? "Online" : "Offline"}
+                                {selectedUser.isPremium && <span style={{ color: "#f59e0b", fontWeight: 700 }}>· ⭐ PREMIUM</span>}
+                                {selectedUser.isAdmin && <span style={{ color: "#6366f1", fontWeight: 700 }}>· ADMIN</span>}
+                              </div>
+                            </div>
+                          </div>
+                          <button onClick={() => setSelectedUser(null)} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "#94a3b8", width: 36, height: 36, cursor: "pointer", fontSize: 16 }}>✕</button>
                         </div>
-                        <div style={{ minWidth: 0, flex: 1 }}>
-                          <div style={{ fontWeight: 800, color: "#fff", fontSize: 15, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                            {u.username || "O'quvchi"}
-                          </div>
-                          <div style={{ fontSize: 12, color: "#64748b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: 2 }}>
-                            {u.email}
-                          </div>
+
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                          {[
+                            { label: "Email", value: selectedUser.email },
+                            { label: "Telefon", value: selectedUser.phone || "—" },
+                            { label: "Daraja", value: selectedUser.level || "A1" },
+                            { label: "XP", value: (selectedUser.xp || 0).toLocaleString() },
+                            { label: "Ro'yxat sanasi", value: fmt(selectedUser.registeredAt || selectedUser.createdAt) },
+                            { label: "Oxirgi kirish", value: fmt(selectedUser.lastLogin || selectedUser.lastUpdated) },
+                            { label: "Premium", value: selectedUser.isPremium ? `Ha (${selectedUser.premiumPlan || "—"})` : "Yo'q" },
+                            { label: "Premium tugashi", value: fmt(selectedUser.premiumExpire) },
+                            { label: "Umumiy XP", value: (selectedUser.xp || 0).toLocaleString() },
+                            { label: "Ketma-ket kunlar", value: `${selectedUser.consecutiveDays || 0} kun` },
+                          ].map((item, i) => (
+                            <div key={i} style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "12px 14px" }}>
+                              <div style={{ fontSize: 10, fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 4 }}>{item.label}</div>
+                              <div style={{ fontSize: 13, fontWeight: 700, color: "#e2e8f0", wordBreak: "break-all" }}>{item.value}</div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {selectedUser.isPremium && (
+                          <button
+                            onClick={() => { setSelectedUser(null); handleRemovePremium(selectedUser.email); }}
+                            style={{ width: "100%", marginTop: 20, padding: "12px", borderRadius: 14, background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", color: "#f87171", fontWeight: 700, cursor: "pointer", fontSize: 13 }}
+                          >Premium Maqomini Bekor Qilish</button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
                         </div>
                       </div>
 

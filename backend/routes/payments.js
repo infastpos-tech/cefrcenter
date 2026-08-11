@@ -245,14 +245,74 @@ router.post("/admin/cleanup", adminAuth, async (req, res) => {
 });
 
 // @route   GET /api/payments/admin/users
-// @desc    List users with premium fields
+// @desc    List all users with full profile data for admin
 // @access  Admin
 router.get("/admin/users", adminAuth, async (req, res) => {
   try {
-    const users = await User.find({}).select("-scores -vocabulary -activityLog -_scoreTimestamps").sort({ lastUpdated: -1 });
-    res.json(users);
+    const { search, status, sort = "newest" } = req.query;
+
+    let query = {};
+
+    // Status filter
+    if (status === "online") query.isOnline = true;
+    else if (status === "offline") query.isOnline = { $ne: true };
+    else if (status === "premium") query.isPremium = true;
+    else if (status === "admin") query.isAdmin = true;
+
+    // Search filter
+    if (search) {
+      const regex = new RegExp(search, "i");
+      query.$or = [
+        { email: regex },
+        { username: regex },
+        { name: regex },
+        { phone: regex },
+      ];
+    }
+
+    const sortMap = {
+      newest: { createdAt: -1 },
+      oldest: { createdAt: 1 },
+      xp: { xp: -1 },
+      name: { name: 1 },
+    };
+    const sortOpt = sortMap[sort] || { createdAt: -1 };
+
+    const users = await User.find(query)
+      .select("-scores -vocabulary -activityLog -_scoreTimestamps -coinTx")
+      .sort(sortOpt)
+      .limit(500)
+      .lean();
+
+    // Format for admin panel
+    const formatted = users.map(u => ({
+      ...u,
+      displayName: u.name || u.username || u.email?.split("@")[0] || "—",
+      registeredAt: u.registeredAt || u.createdAt || null,
+    }));
+
+    res.json(formatted);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch users" });
+  }
+});
+
+// @route   GET /api/payments/admin/users/:id
+// @desc    Get single user detail by MongoDB _id
+// @access  Admin
+router.get("/admin/users/:id", adminAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .select("-scores -vocabulary -activityLog -_scoreTimestamps -coinTx")
+      .lean();
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json({
+      ...user,
+      displayName: user.name || user.username || user.email?.split("@")[0] || "—",
+      registeredAt: user.registeredAt || user.createdAt || null,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch user" });
   }
 });
 

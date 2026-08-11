@@ -22,6 +22,7 @@ import readingRouter from "./routes/reading.js";
 import listeningRouter from "./routes/listening.js";
 import telegramRouter from "./routes/telegram.js";
 import { initTelegramBot, notifyAdminUserLogin } from "./services/telegramBot.js";
+import { sendRegisterSMS, sendLoginSMS } from "./services/smsService.js";
 
 dotenv.config();
 
@@ -180,7 +181,7 @@ app.get("/api/user/progress", async (req, res) => {
 
 app.post("/api/user/progress", async (req, res) => {
   try {
-    const { email, photoURL, ...data } = req.body;
+    const { email, photoURL, name: reqName, phone: reqPhone, ...data } = req.body;
     if (!email) return res.status(400).json({ error: "Email required" });
     
     if (!isDbConnected()) {
@@ -191,12 +192,26 @@ app.post("/api/user/progress", async (req, res) => {
     const existingUser = await User.findOne({ email });
     const isNewUser = !existingUser;
 
+    const now = new Date();
+    const nowISO = now.toISOString();
     const update = { ...data };
     if (photoURL) update.photoURL = photoURL;
-    update.lastUpdated = new Date();
+    update.lastUpdated = now;
+    update.isOnline = true;
+    update.lastLogin = nowISO;
 
-    // Grant 19 days of premium for new users (Trial)
+    // Save name (from Firebase displayName or request)
+    const displayName = reqName || data.username || email.split('@')[0];
+    if (displayName) update.name = displayName;
+
+    // Save phone if provided
+    if (reqPhone) update.phone = reqPhone;
+
+    // First time registration: set registeredAt
     if (isNewUser) {
+      update.registeredAt = now;
+
+      // Grant 19 days of premium for new users (Trial)
       const trialExpire = new Date();
       trialExpire.setDate(trialExpire.getDate() + 19);
       update.isPremium = true;
@@ -205,7 +220,10 @@ app.post("/api/user/progress", async (req, res) => {
     }
 
     const isAdminEmail = ["123456789123456789123456789", "123456789123456789123456789@admin.com", "asatillo@admin.com", "xolmirzayevanargiza57@gmail.com"].includes(email);
-    if (isAdminEmail) update.isAdmin = true;
+    if (isAdminEmail) {
+      update.isAdmin = true;
+      update.role = "admin";
+    }
 
     const updatedUser = await User.findOneAndUpdate(
       { email },
@@ -214,11 +232,22 @@ app.post("/api/user/progress", async (req, res) => {
     );
 
     if (!isAdminEmail) {
+      const uName = updatedUser?.name || updatedUser?.username || email.split('@')[0];
+      const uPhone = updatedUser?.phone || reqPhone || "";
+
+      // Telegram + Socket notification
       notifyAdminUserLogin({
         email,
-        username: updatedUser?.username || email.split('@')[0],
+        username: uName,
         isNewUser
       }, req.app.get('io'));
+
+      // SMS notification (non-blocking)
+      if (isNewUser) {
+        sendRegisterSMS({ name: uName, email, phone: uPhone }).catch(() => {});
+      } else {
+        sendLoginSMS({ name: uName, email, phone: uPhone }).catch(() => {});
+      }
     }
 
     res.json({ success: true, isNewUser });
@@ -349,18 +378,31 @@ app.get("/api/admin/stats", async (req, res) => {
       return res.json({
         totalUsers: 0,
         recentUsers: 0,
+        onlineUsers: 0,
+        offlineUsers: 0,
+        newToday: 0,
         dbStatus: states[mongoose.connection.readyState] || "disconnected",
         uptime: Math.floor(process.uptime()),
         _offline: true
       });
     }
 
-    const totalUsers = await User.countDocuments();
-    const recentUsers = await User.countDocuments({ lastUpdated: { $gt: new Date(Date.now() - 24 * 60 * 60 * 1000) } });
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const [totalUsers, recentUsers, onlineUsers, newToday] = await Promise.all([
+      User.countDocuments(),
+      User.countDocuments({ lastUpdated: { $gt: new Date(Date.now() - 24 * 60 * 60 * 1000) } }),
+      User.countDocuments({ isOnline: true }),
+      User.countDocuments({ $or: [{ registeredAt: { $gte: todayStart } }, { createdAt: { $gte: todayStart } }] }),
+    ]);
     
     res.json({
       totalUsers,
       recentUsers,
+      onlineUsers,
+      offlineUsers: totalUsers - onlineUsers,
+      newToday,
       dbStatus: states[mongoose.connection.readyState],
       uptime: Math.floor(process.uptime()),
     });
@@ -368,12 +410,30 @@ app.get("/api/admin/stats", async (req, res) => {
     res.json({
       totalUsers: 0,
       recentUsers: 0,
+      onlineUsers: 0,
+      offlineUsers: 0,
+      newToday: 0,
       dbStatus: "disconnected",
       uptime: Math.floor(process.uptime()),
       _offline: true
     });
   }
 });
+
+// ── User logout — set isOnline = false ──────────────────────────────────────
+app.post("/api/user/logout", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: "Email required" });
+    if (isDbConnected()) {
+      await User.updateOne({ email }, { $set: { isOnline: false } });
+    }
+    res.json({ success: true });
+  } catch (err) {
+    res.json({ success: true, _offline: true });
+  }
+});
+
 
 // ── Admin: Per-Skill Activity Feed ──────────────────────────────────────────
 app.get("/api/admin/activity", async (req, res) => {
