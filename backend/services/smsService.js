@@ -22,6 +22,9 @@ let eskizTokenCache = null;
 let eskizTokenExpiry = 0;
 
 async function getEskizToken() {
+  if (process.env.ESKIZ_TOKEN) return process.env.ESKIZ_TOKEN;
+  if (process.env.SMS_API_KEY) return process.env.SMS_API_KEY;
+
   const now = Date.now();
   if (eskizTokenCache && now < eskizTokenExpiry) return eskizTokenCache;
 
@@ -29,7 +32,7 @@ async function getEskizToken() {
   const password = process.env.ESKIZ_PASSWORD;
 
   if (!email || !password) {
-    console.warn("⚠️ ESKIZ_EMAIL / ESKIZ_PASSWORD missing in .env — SMS disabled");
+    console.warn("⚠️ ESKIZ_EMAIL / ESKIZ_PASSWORD / ESKIZ_TOKEN missing in .env — SMS disabled");
     return null;
   }
 

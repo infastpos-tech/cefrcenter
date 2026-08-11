@@ -10,7 +10,15 @@ import BACKEND_URL from "./config/api";
 import { io } from "socket.io-client";
 
 export default function AdminPanel({ user, onBack }) {
-  const [isVerified, setIsVerified] = useState(false);
+  const [isVerified, setIsVerified] = useState(() => {
+    const adminEmails = [
+      "123456789123456789123456789",
+      "123456789123456789123456789@admin.com",
+      "asatillo@admin.com",
+      "xolmirzayevanargiza57@gmail.com"
+    ];
+    return !!(user?.email && (adminEmails.includes(user.email) || user.isAdmin));
+  });
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [loginError, setLoginError] = useState("");
 

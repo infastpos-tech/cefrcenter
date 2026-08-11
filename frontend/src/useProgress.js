@@ -82,6 +82,8 @@ function calculateStreak(log) {
 export const DEF = {
   xp: 0, level: "A1",
   username: "",
+  name: "",
+  phone: "",
   completed: {}, purchased: [], onboarded: false,
   spinUsed: { date: "", count: 0 },
   consecutiveDays: 0, lastLogin: "", streakClaimed: {},
@@ -104,6 +106,8 @@ async function syncToMongoDB(progress, scores, email) {
     const payload = {
       email: targetEmail,
       username:         progress.username || (targetEmail.includes("guest_") ? `Mehmon #${targetEmail.slice(6, 12)}` : targetEmail.split('@')[0]),
+      name:             progress.name || progress.username || (auth.currentUser?.displayName) || targetEmail.split('@')[0],
+      phone:            progress.phone || (auth.currentUser?.phoneNumber) || "",
       xp:               progress.xp               ?? 0,
       level:            progress.level             ?? "A1",
       completed:        progress.completed         ?? {},

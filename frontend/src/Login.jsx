@@ -79,6 +79,7 @@ export default function Login() {
   const [email, setEmail]             = useState("");
   const [password, setPassword]       = useState("");
   const [username, setUsername]       = useState("");
+  const [phone, setPhone]             = useState("");
   const [level, setLevel]             = useState("B1");
   const [loading, setLoading]         = useState(false);
   const [error, setError]             = useState("");
@@ -148,7 +149,17 @@ export default function Login() {
       }
 
       if (isLoginMode) {
-        await signInWithEmailAndPassword(auth, email, password);
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        // Instant MongoDB sync + admin notification
+        fetch(`${BACKEND_URL}/api/user/progress`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: cred.user.email,
+            name: cred.user.displayName || email.split('@')[0],
+          })
+        }).catch(() => {});
+
         setSuccess(true);
         setTimeout(() => navigate("/dashboard"), 1200);
       } else {
@@ -158,12 +169,27 @@ export default function Login() {
         await updateProfile(c.user, { displayName: username });
         setInitialLevel(level, username);
         updateUsername(username);
+
+        // Instant MongoDB registration sync + admin notification + SMS
+        fetch(`${BACKEND_URL}/api/user/progress`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: c.user.email,
+            username: username,
+            name: username,
+            phone: phone.trim(),
+            level: level
+          })
+        }).catch(() => {});
+
         setSuccess(true);
         setTimeout(() => navigate("/dashboard"), 1200);
       }
     } catch (err) { setError(errMsg(err.code)); }
     finally { setLoading(false); }
   };
+
 
   const switchMode = (mode) => {
     setIsLoginMode(mode); setError("");
@@ -326,6 +352,26 @@ export default function Login() {
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* ─ PHONE NUMBER (only register) ─ */}
+          {!isLoginMode && (
+            <div className="lp-field">
+              <label>
+                <Zap size={11} />
+                Telefon raqamingiz (+998)
+              </label>
+              <div className="lp-inp">
+                <span style={{ fontSize: 13, color: "#94a3b8", paddingLeft: 14, fontWeight: 700 }}>+998</span>
+                <input
+                  type="tel"
+                  placeholder="90 123 45 67"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  autoComplete="tel"
+                />
+              </div>
             </div>
           )}
 
