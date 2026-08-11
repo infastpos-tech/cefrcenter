@@ -1289,34 +1289,6 @@ export default function AdminPanel({ user, onBack }) {
               );
             })()}
 
-                        </div>
-                      </div>
-
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 12 }}>
-                        {u.isPremium ? (
-                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                            <Star size={15} color="#f59e0b" fill="#f59e0b" />
-                            <span style={{ fontSize: 12, fontWeight: 800, color: "#fbbf24" }}>PREMIUM</span>
-                          </div>
-                        ) : (
-                          <span style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>ODDIY HISOB</span>
-                        )}
-
-                        {u.isPremium && (
-                          <button
-                            onClick={() => handleRemovePremium(u.email)}
-                            style={{ padding: "6px 12px", borderRadius: 10, background: "rgba(239, 68, 68, 0.15)", border: "1px solid rgba(239,68,68,0.3)", color: "#f87171", fontSize: 12, fontWeight: 700, cursor: "pointer" }}
-                          >
-                            Olib tashlash
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
           </div>
         )}
       </main>
