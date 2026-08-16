@@ -438,6 +438,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [timeBonusClaimed, setTimeBonusClaimed] = useState(false);
   const [lessons, setLessons] = useState(defaultLessonsData);
+  const [totalUsers, setTotalUsers] = useState(null);
   const userAddedRef = useRef(false);
   const timerRef = useRef(null);
   const syncTimerRef = useRef(null);
@@ -482,6 +483,19 @@ export default function Dashboard() {
         }
       })
       .catch(e => console.warn("Using built-in lessons (backend sync pending):", e.message));
+  }, []);
+
+  // Fetch total user count (visible for all, updates every 60s)
+  useEffect(() => {
+    const fetchUsers = () => {
+      fetch(`${BACKEND_URL}/api/admin/stats`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => { if (data?.totalUsers != null) setTotalUsers(data.totalUsers); })
+        .catch(() => {});
+    };
+    fetchUsers();
+    const interval = setInterval(fetchUsers, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   // Auth listener
@@ -593,6 +607,25 @@ export default function Dashboard() {
           </button>
           <span style={{ fontSize: 16, fontWeight: 800, color: "var(--accent)", letterSpacing: "-0.5px" }}>Cefr Center</span>
         </div>
+
+        {/* 👥 Live user count badge — always visible */}
+        {totalUsers != null && (
+          <div style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(0,113,227,0.08)", border: "1px solid rgba(0,113,227,0.18)", borderRadius: 20, padding: "3px 10px 3px 7px", cursor: "default" }}>
+            <span style={{ fontSize: 15 }}>👥</span>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "#0071e3" }}>{totalUsers.toLocaleString()}</span>
+            <span style={{ fontSize: 10, color: "#6e6e73", fontWeight: 400 }}>users</span>
+          </div>
+        )}
+
+        {/* 🔐 Admin Panel shortcut — only for admin users */}
+        {isAdmin && (
+          <button
+            onClick={() => navigate("/admin")}
+            style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(99,102,241,0.10)", border: "1px solid rgba(99,102,241,0.25)", borderRadius: 20, padding: "4px 12px 4px 9px", cursor: "pointer", color: "#6366f1", fontSize: 12, fontWeight: 700, fontFamily: "inherit" }}
+          >
+            <span style={{ fontSize: 14 }}>🛡️</span> Admin →
+          </button>
+        )}
 
         <button onClick={() => window.location.reload()} style={{ background: "var(--bg-primary)", border: "1px solid var(--border)", borderRadius: 8, padding: "5px 10px", color: "var(--text-muted)", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
           <Ic n="spin" s={12} c="var(--text-muted)" /> Sync
