@@ -84,7 +84,7 @@ export default function About() {
         }
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(99,102,241,0.3)";
+        ctx.fillStyle = "rgba(0,113,227,0.2)";
         ctx.fill();
       }
       requestAnimationFrame(animate);

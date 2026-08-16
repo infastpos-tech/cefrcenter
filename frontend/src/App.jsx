@@ -21,43 +21,43 @@ import { auth }           from "./firebase";
 import TelegramAppWrapper from "./TelegramAppWrapper";
 
 
-// ── Splash / Loading screen ───────────────────────────────────────────────────
+// ── Splash / Loading screen — Apple Style ────────────────────────────────────
 function Loader() {
   return (
     <div style={{
       minHeight:      "100vh",
-      background:     "linear-gradient(135deg, #0b1120 0%, #1e1b4b 50%, #0f172a 100%)",
+      background:     "#f5f5f7",
       display:        "flex",
       flexDirection:  "column",
       alignItems:     "center",
       justifyContent: "center",
-      gap:            24,
+      gap:            20,
       position:       "relative",
       overflow:       "hidden",
     }}>
-      {/* Background orbs */}
+      {/* Subtle orbs */}
+      <div style={{
+        position: "absolute", width: 400, height: 400,
+        borderRadius: "50%",
+        background: "radial-gradient(circle, rgba(0,113,227,0.06) 0%, transparent 70%)",
+        top: "-100px", left: "-100px",
+      }} />
       <div style={{
         position: "absolute", width: 300, height: 300,
         borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%)",
-        top: "10%", left: "20%", animation: "pulse 3s ease-in-out infinite",
-      }} />
-      <div style={{
-        position: "absolute", width: 200, height: 200,
-        borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%)",
-        bottom: "20%", right: "15%", animation: "pulse 4s ease-in-out infinite reverse",
+        background: "radial-gradient(circle, rgba(94,92,230,0.05) 0%, transparent 70%)",
+        bottom: "-80px", right: "-80px",
       }} />
 
       {/* Logo */}
       <div style={{
-        width: 80, height: 80,
-        borderRadius: 24,
-        background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+        width: 76, height: 76,
+        borderRadius: 22,
+        background: "linear-gradient(135deg, #0071e3, #5e5ce6)",
         display: "flex", alignItems: "center", justifyContent: "center",
-        boxShadow: "0 0 40px rgba(99,102,241,0.5), 0 0 80px rgba(99,102,241,0.2)",
-        animation: "logoFloat 2s ease-in-out infinite",
-        fontSize: 32, fontWeight: 900, color: "#fff",
+        boxShadow: "0 8px 30px rgba(0,113,227,0.25)",
+        animation: "logoFloat 2.5s ease-in-out infinite",
+        fontSize: 30, fontWeight: 800, color: "#fff",
         letterSpacing: -1,
       }}>
         C
@@ -66,24 +66,23 @@ function Loader() {
       {/* Title */}
       <div style={{ textAlign: "center" }}>
         <div style={{
-          fontSize: 28, fontWeight: 800,
-          background: "linear-gradient(135deg, #a5b4fc, #c4b5fd)",
-          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-          letterSpacing: -0.5, marginBottom: 6,
+          fontSize: 26, fontWeight: 700,
+          color: "#1d1d1f",
+          letterSpacing: -0.8, marginBottom: 5,
         }}>
-          CEFR<span style={{ fontWeight: 400 }}>Center</span>
+          CEFR<span style={{ fontWeight: 400, color: "#6e6e73" }}>Center</span>
         </div>
-        <div style={{ color: "#64748b", fontSize: 13, letterSpacing: 0.5 }}>
+        <div style={{ color: "#aeaeb2", fontSize: 13, letterSpacing: 0 }}>
           Yuklanmoqda...
         </div>
       </div>
 
       {/* Spinner dots */}
-      <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+      <div style={{ display: "flex", gap: 7, marginTop: 4 }}>
         {[0, 1, 2].map(i => (
           <div key={i} style={{
-            width: 8, height: 8, borderRadius: "50%",
-            background: "#6366f1",
+            width: 7, height: 7, borderRadius: "50%",
+            background: "#0071e3",
             animation: `dotBounce 1.2s ease-in-out ${i * 0.2}s infinite`,
           }} />
         ))}
@@ -91,16 +90,12 @@ function Loader() {
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); opacity: 0.6; }
-          50%       { transform: scale(1.15); opacity: 1; }
-        }
         @keyframes logoFloat {
           0%, 100% { transform: translateY(0px); }
-          50%       { transform: translateY(-8px); }
+          50%       { transform: translateY(-7px); }
         }
         @keyframes dotBounce {
-          0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+          0%, 80%, 100% { transform: scale(0.6); opacity: 0.35; }
           40%            { transform: scale(1.2); opacity: 1; }
         }
       `}</style>

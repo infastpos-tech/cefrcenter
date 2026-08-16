@@ -1,10 +1,15 @@
-// Reading.jsx — all 5 part types
+// Reading.jsx — all 5 part types — Apple Light Design
 import React, { useState, useCallback } from "react";
 import { scoreToWritingBand } from "./scoring";
 import SectionLeaderboard from "./components/SectionLeaderboard.jsx";
 
 const GROQ = import.meta.env.VITE_GROQ_API_KEY || "";
 const MAX = 75;
+
+// Apple blue accent for Reading
+const CLR = "#0071e3";
+const CLR_BG = "rgba(0,113,227,0.08)";
+const CLR_BORDER = "rgba(0,113,227,0.20)";
 
 async function ai(prompt) {
   try {
@@ -33,7 +38,6 @@ function I({ n, s = 16, c = "currentColor" }) {
   return m[n] || null;
 }
 
-const CLR = "#378ADD";
 function norm(s) { return (s || "").toLowerCase().trim().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim(); }
 
 function scoreLocal(part, ans) {
@@ -50,7 +54,6 @@ function scoreLocal(part, ans) {
     } else if (ptype === "true_false") {
       if (norm(String(ua)) === norm(String(item.answer)) && ua !== "") c++;
     } else {
-      // mcq_reading, short_answer, summary, multiple_choice, matching_headings
       if (typeof item.answer === "number") {
         if (Number(ua) === item.answer && ua !== "") c++;
       } else if (typeof item.answer === "string" && !isNaN(Number(item.answer))) {
@@ -119,7 +122,6 @@ export default function Reading({ progress, scores, saveScore, addXP, clearSecti
           correctAns = String(item.answer).toUpperCase();
           userAns = ua ? String(ua).toUpperCase() : "—";
         } else {
-          // mcq_reading, short_answer, summary, multiple_choice, matching_headings
           if (typeof item.answer === "number" || (typeof item.answer === "string" && !isNaN(Number(item.answer)))) {
             const numAns = Number(item.answer);
             ok = Number(ua) === numAns && ua !== "";
@@ -158,46 +160,46 @@ export default function Reading({ progress, scores, saveScore, addXP, clearSecti
       <style>{`
         @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
         @keyframes spin{to{transform:rotate(360deg)}}
-        @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-        .r-card:hover{transform:translateY(-2px) !important;box-shadow:0 8px 32px rgba(0,0,0,0.3) !important;}
+        @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+        .r-card:hover{transform:translateY(-3px) !important;box-shadow:0 12px 40px rgba(0,0,0,0.10) !important;}
       `}</style>
 
       {/* Hero Header */}
       <div style={{
-        background: "linear-gradient(135deg, rgba(55,138,221,0.12) 0%, rgba(127,119,221,0.06) 100%)",
-        border: "1px solid rgba(55,138,221,0.2)",
+        background: "linear-gradient(135deg, rgba(0,113,227,0.07) 0%, rgba(94,92,230,0.04) 100%)",
+        border: "1px solid rgba(0,113,227,0.15)",
         borderRadius: 20, padding: "22px 24px", marginBottom: 20,
         position: "relative", overflow: "hidden",
       }}>
-        <div style={{ position:"absolute", top:-40, right:-40, width:140, height:140, borderRadius:"50%", background:"radial-gradient(circle, rgba(55,138,221,0.15) 0%, transparent 70%)", pointerEvents:"none" }} />
+        <div style={{ position:"absolute", top:-40, right:-40, width:140, height:140, borderRadius:"50%", background:"radial-gradient(circle, rgba(0,113,227,0.08) 0%, transparent 70%)", pointerEvents:"none" }} />
         <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", flexWrap:"wrap", gap:16 }}>
           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
             <span style={{ fontSize: 28 }}>📖</span>
             <div>
-              <h2 style={{ fontSize: 22, fontWeight: 900, color: "#f0f4ff", margin: 0 }}>
+              <h2 style={{ fontSize: 22, fontWeight: 700, color: "#1d1d1f", margin: 0, letterSpacing: "-0.5px" }}>
                 <span style={{ color: CLR }}>Reading</span> Practice
               </h2>
-              <p style={{ color: "#4a5568", fontSize: 12, margin: 0 }}>CEFR-style · 5 parts · Gap fill, Matching, MCQ</p>
+              <p style={{ color: "#6e6e73", fontSize: 12, margin: 0 }}>CEFR-style · 5 parts · Gap fill, Matching, MCQ</p>
             </div>
           </div>
           <div style={{ display:"flex", gap:8, alignItems:"center" }}>
             {bestScore > 0 && (
-              <div style={{ background:`rgba(55,138,221,0.1)`, border:`1px solid ${CLR}44`, borderRadius:12, padding:"8px 14px", textAlign:"center" }}>
+              <div style={{ background: CLR_BG, border:`1px solid ${CLR_BORDER}`, borderRadius:12, padding:"8px 14px", textAlign:"center" }}>
                 <div style={{ fontSize:10, color:CLR, fontWeight:700, textTransform:"uppercase" }}>Best</div>
-                <div style={{ fontSize:20, fontWeight:900, color:CLR }}>{bestScore}<span style={{fontSize:11,opacity:0.6}}>/75</span></div>
+                <div style={{ fontSize:20, fontWeight:800, color:CLR }}>{bestScore}<span style={{fontSize:11,opacity:0.6}}>/75</span></div>
               </div>
             )}
-            <button onClick={() => clearSectionScores("reading_")} style={{ display:"flex", alignItems:"center", gap:4, fontSize:11, color:"#4a5568", background:"transparent", border:"0.5px solid rgba(255,255,255,0.08)", padding:"5px 10px", borderRadius:7, cursor:"pointer", fontFamily:"inherit" }}>
-              <I n="trash" s={12} c="#4a5568" /> Clear
+            <button onClick={() => clearSectionScores("reading_")} style={{ display:"flex", alignItems:"center", gap:4, fontSize:11, color:"#6e6e73", background:"transparent", border:"1px solid rgba(0,0,0,0.10)", padding:"5px 10px", borderRadius:7, cursor:"pointer", fontFamily:"inherit" }}>
+              <I n="trash" s={12} c="#6e6e73" /> Clear
             </button>
           </div>
         </div>
-        <div style={{ display:"flex", gap:10, marginTop:14, flexWrap:"wrap" }}>
+        <div style={{ display:"flex", gap:8, marginTop:14, flexWrap:"wrap" }}>
           {[{icon:"📖",val:tests.length,label:"Tests"},{icon:"❓",val:tests.reduce((s,t)=>s+t.totalQuestions,0),label:"Questions"},{icon:"✅",val:doneCount,label:"Done",color:doneCount>0?CLR:undefined}].map(({icon,val,label,color})=>(
-            <div key={label} style={{background:"rgba(255,255,255,0.04)",borderRadius:10,padding:"8px 14px",display:"flex",alignItems:"center",gap:7,border:"1px solid rgba(255,255,255,0.06)"}}>
+            <div key={label} style={{background:"rgba(255,255,255,0.80)",borderRadius:10,padding:"7px 14px",display:"flex",alignItems:"center",gap:7,border:"1px solid rgba(0,0,0,0.08)",boxShadow:"0 1px 4px rgba(0,0,0,0.05)"}}>
               <span style={{fontSize:14}}>{icon}</span>
-              <span style={{fontSize:14,fontWeight:800,color:color||"#f0f4ff"}}>{val}</span>
-              <span style={{fontSize:11,color:"#4a5568"}}>{label}</span>
+              <span style={{fontSize:14,fontWeight:700,color:color||"#1d1d1f"}}>{val}</span>
+              <span style={{fontSize:11,color:"#6e6e73"}}>{label}</span>
             </div>
           ))}
         </div>
@@ -206,17 +208,17 @@ export default function Reading({ progress, scores, saveScore, addXP, clearSecti
       {/* Two-column */}
       <div style={{ display:"grid", gridTemplateColumns:"1fr 2fr", gap:16, alignItems:"start" }}>
         {/* Leaderboard */}
-        <div style={{ background:"linear-gradient(180deg,rgba(255,215,0,0.04),rgba(255,255,255,0.01))", border:"1px solid rgba(255,215,0,0.12)", borderRadius:16, padding:"16px 12px", position:"sticky", top:0 }}>
+        <div style={{ background:"linear-gradient(180deg,rgba(255,200,0,0.05),rgba(255,255,255,0.8))", border:"1px solid rgba(255,200,0,0.15)", borderRadius:16, padding:"16px 12px", position:"sticky", top:0, boxShadow:"0 2px 8px rgba(0,0,0,0.05)" }}>
           <SectionLeaderboard section="reading" currentUser={progress?.user} />
         </div>
 
         {/* Tests */}
-        <div style={{ display:"grid", gap:10 }}>
+        <div style={{ display:"grid", gap:8 }}>
           {tests.length === 0 ? (
-            <div style={{ textAlign:"center", padding:"40px 20px", color:"#4a5568", border:"1px dashed rgba(255,255,255,0.08)", borderRadius:14 }}>
+            <div style={{ textAlign:"center", padding:"40px 20px", color:"#6e6e73", border:"1px dashed rgba(0,0,0,0.12)", borderRadius:14, background:"#ffffff" }}>
               <div style={{fontSize:32,marginBottom:10}}>📭</div>
-              <div style={{fontSize:14,fontWeight:700,color:"#8b9bbf",marginBottom:4}}>No tests available</div>
-              <div style={{fontSize:12}}>Backend may be offline.</div>
+              <div style={{fontSize:14,fontWeight:700,color:"#1d1d1f",marginBottom:4}}>No tests available</div>
+              <div style={{fontSize:12,color:"#6e6e73"}}>Backend may be offline.</div>
             </div>
           ) : tests.map((t, idx) => {
             const saved = scores?.[`reading_${t.id}_overall`];
@@ -226,37 +228,38 @@ export default function Reading({ progress, scores, saveScore, addXP, clearSecti
             return (
               <div key={t.id} className="r-card" onClick={() => openTest(t)}
                 style={{
-                  background: done ? "linear-gradient(135deg,rgba(55,138,221,0.06),rgba(55,138,221,0.02))" : "rgba(255,255,255,0.02)",
-                  border:`1px solid ${done ? CLR+"33" : "rgba(255,255,255,0.06)"}`,
+                  background: done ? `linear-gradient(135deg,${CLR_BG},rgba(0,113,227,0.04))` : "#ffffff",
+                  border:`1px solid ${done ? CLR_BORDER : "rgba(0,0,0,0.08)"}`,
                   borderRadius:14, padding:"14px 16px", cursor:"pointer",
                   transition:"all .2s ease", position:"relative", overflow:"hidden",
-                  animation:`slideUp .4s ease ${idx*0.05}s both`,
+                  animation:`slideUp .4s ease ${idx*0.03}s both`,
+                  boxShadow: "0 1px 6px rgba(0,0,0,0.05)",
                 }}>
-                {done && <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,transparent,${info?.color||CLR},transparent)`}} />}
+                {done && <div style={{position:"absolute",top:0,left:0,right:0,height:2.5,background:`linear-gradient(90deg,transparent,${info?.color||CLR},transparent)`}} />}
                 <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:10 }}>
                   <div style={{ display:"flex", alignItems:"center", gap:12, flex:1, minWidth:0 }}>
-                    <div style={{ width:40, height:40, borderRadius:12, flexShrink:0, background:done?`rgba(55,138,221,0.2)`:"rgba(255,255,255,0.04)", border:`2px solid ${done?CLR+"55":"rgba(255,255,255,0.08)"}`, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                      {done ? <span style={{fontSize:16}}>✅</span> : <span style={{fontSize:14,fontWeight:900,color:"#8b9bbf"}}>{idx+1}</span>}
+                    <div style={{ width:40, height:40, borderRadius:12, flexShrink:0, background:done?CLR_BG:"rgba(0,0,0,0.04)", border:`1.5px solid ${done?CLR_BORDER:"rgba(0,0,0,0.08)"}`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                      {done ? <span style={{fontSize:16}}>✅</span> : <span style={{fontSize:14,fontWeight:700,color:"#aeaeb2"}}>{idx+1}</span>}
                     </div>
                     <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ fontSize:13, fontWeight:700, color:"#f0f4ff", marginBottom:3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{t.title}</div>
+                      <div style={{ fontSize:13, fontWeight:600, color:"#1d1d1f", marginBottom:3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{t.title}</div>
                       <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
-                        <span style={{ fontSize:10, background:`${CLR}20`, color:CLR, padding:"1px 7px", borderRadius:6, fontWeight:700 }}>{t.level}</span>
-                        <span style={{ fontSize:10, color:"#4a5568" }}>📝 {t.totalQuestions}Q</span>
-                        <span style={{ fontSize:10, color:"#4a5568" }}>⏱️ {t.duration}min</span>
-                        <span style={{ fontSize:10, color:"#4a5568" }}>📚 {t.parts?.length||5} parts</span>
+                        <span style={{ fontSize:10, background:CLR_BG, color:CLR, padding:"1px 7px", borderRadius:6, fontWeight:600 }}>{t.level}</span>
+                        <span style={{ fontSize:10, color:"#6e6e73" }}>📝 {t.totalQuestions}Q</span>
+                        <span style={{ fontSize:10, color:"#6e6e73" }}>⏱️ {t.duration}min</span>
+                        <span style={{ fontSize:10, color:"#6e6e73" }}>📚 {t.parts?.length||5} parts</span>
                       </div>
                     </div>
                   </div>
                   <div style={{ flexShrink:0, textAlign:"right" }}>
                     {info ? (
-                      <><div style={{fontSize:15,fontWeight:900,color:info.color}}>{saved}<span style={{fontSize:10,opacity:0.6}}>/75</span></div>
-                      <div style={{fontSize:9,color:info.color,fontWeight:700,background:`${info.color}18`,padding:"1px 6px",borderRadius:4}}>Band {info.band} · {info.cefr}</div></>
-                    ) : <div style={{fontSize:11,color:"#4a5568"}}>Start →</div>}
+                      <><div style={{fontSize:15,fontWeight:700,color:info.color}}>{saved}<span style={{fontSize:10,opacity:0.6}}>/75</span></div>
+                      <div style={{fontSize:9,color:info.color,fontWeight:700,background:`${info.color}15`,padding:"1px 6px",borderRadius:4}}>Band {info.band} · {info.cefr}</div></>
+                    ) : <div style={{fontSize:11,color:"#6e6e73",fontWeight:500}}>Start →</div>}
                   </div>
                 </div>
                 {done && (
-                  <div style={{ marginTop:10, height:3, borderRadius:2, background:"rgba(255,255,255,0.06)", overflow:"hidden" }}>
+                  <div style={{ marginTop:10, height:3, borderRadius:2, background:"rgba(0,0,0,0.06)", overflow:"hidden" }}>
                     <div style={{ height:"100%", width:`${pct}%`, background:info?.color||CLR, borderRadius:2, transition:"width 1s ease" }} />
                   </div>
                 )}
@@ -276,24 +279,32 @@ export default function Reading({ progress, scores, saveScore, addXP, clearSecti
     const items = part.gaps || part.questions || part.paragraphs || part.sentences || [];
     const answered = items.filter((_, i) => partAns[i] != null && partAns[i] !== "").length;
 
+    // Apple-style component styles
+    const cardStyle = { background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 14, padding: "18px 20px", marginBottom: 14, boxShadow: "0 1px 6px rgba(0,0,0,0.05)" };
+    const passageStyle = { background: "#f5f5f7", borderRadius: 12, padding: "18px 20px", marginBottom: 14, maxHeight: 360, overflowY: "auto", fontSize: 14, color: "#1d1d1f", lineHeight: 1.85, border: "1px solid rgba(0,0,0,0.07)" };
+    const inputStyle = (val) => ({ width: 110, background: val ? "rgba(0,113,227,0.06)" : "#f5f5f7", border: "none", borderBottom: `2px solid ${val ? CLR : "rgba(0,0,0,0.15)"}`, borderRadius: "4px 4px 0 0", padding: "2px 8px", color: "#1d1d1f", fontSize: 13, fontFamily: "inherit", outline: "none", textAlign: "center" });
+    const selectStyle = (val) => ({ background: "#f5f5f7", border: `1.5px solid ${val ? CLR : "rgba(0,0,0,0.12)"}`, borderRadius: 10, padding: "8px 32px 8px 14px", color: val ? "#1d1d1f" : "#aeaeb2", fontSize: 13, fontFamily: "inherit", cursor: "pointer", minWidth: 120, appearance: "none" });
+    const optionStyle = (isSel) => ({ padding: "9px 14px", borderRadius: 10, cursor: "pointer", fontSize: 13, border: isSel ? `2px solid ${CLR}` : "1px solid rgba(0,0,0,0.08)", background: isSel ? CLR_BG : "#ffffff", color: isSel ? CLR : "#1d1d1f", transition: "all .12s", display: "flex", alignItems: "center", gap: 10 });
+    const circleStyle = (isSel) => ({ width: 28, height: 28, borderRadius: "50%", flexShrink: 0, background: isSel ? CLR : "rgba(0,0,0,0.05)", color: isSel ? "#fff" : "#6e6e73", fontWeight: 700, fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", border: isSel ? "none" : "1px solid rgba(0,0,0,0.12)" });
+
     return (
       <div style={{ animation: "fadeUp .3s ease", maxWidth: 780, margin: "0 auto" }}>
         <style>{`@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}} @keyframes spin{to{transform:rotate(360deg)}}`}</style>
 
         {/* Nav */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16, paddingBottom: 12, borderBottom: "1px solid rgba(255,255,255,0.07)", flexWrap: "wrap" }}>
-          <button onClick={() => setView("list")} style={{ display: "flex", alignItems: "center", gap: 5, background: "transparent", border: "none", color: "#8b9bbf", cursor: "pointer", fontFamily: "inherit", fontSize: 13 }}>
-            <I n="back" s={13} c="#8b9bbf" /> Tests
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16, paddingBottom: 14, borderBottom: "1px solid rgba(0,0,0,0.08)", flexWrap: "wrap" }}>
+          <button onClick={() => setView("list")} style={{ display: "flex", alignItems: "center", gap: 5, background: "transparent", border: "none", color: "#6e6e73", cursor: "pointer", fontFamily: "inherit", fontSize: 13 }}>
+            <I n="back" s={13} c="#6e6e73" /> Tests
           </button>
-          <div style={{ height: 14, width: 1, background: "rgba(255,255,255,0.1)" }} />
-          <span style={{ fontSize: 13, fontWeight: 600, color: "#f0f4ff" }}>{sel.title}</span>
+          <div style={{ height: 14, width: 1, background: "rgba(0,0,0,0.10)" }} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: "#1d1d1f" }}>{sel.title}</span>
           <div style={{ marginLeft: "auto", display: "flex", gap: 5 }}>
             {sel.parts.map((p, i) => {
               const hasAns = Object.keys(allAns[p.id] || {}).length > 0;
               return (
                 <button key={i} onClick={() => setPIdx(i)}
-                  style={{ padding: "4px 10px", borderRadius: 7, border: `1px solid ${pIdx === i ? CLR : "rgba(255,255,255,0.1)"}`, background: pIdx === i ? `${CLR}22` : "transparent", color: pIdx === i ? CLR : hasAns ? "#5dcaa5" : "#8b9bbf", cursor: "pointer", fontFamily: "inherit", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", gap: 3 }}>
-                  {hasAns && pIdx !== i ? <I n="check" s={9} c="#5dcaa5" /> : null}P{p.partNum}
+                  style={{ padding: "4px 10px", borderRadius: 7, border: `1.5px solid ${pIdx === i ? CLR : "rgba(0,0,0,0.10)"}`, background: pIdx === i ? CLR_BG : "#ffffff", color: pIdx === i ? CLR : hasAns ? "#34c759" : "#6e6e73", cursor: "pointer", fontFamily: "inherit", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", gap: 3 }}>
+                  {hasAns && pIdx !== i ? <I n="check" s={9} c="#34c759" /> : null}P{p.partNum}
                 </button>
               );
             })}
@@ -301,41 +312,40 @@ export default function Reading({ progress, scores, saveScore, addXP, clearSecti
         </div>
 
         {/* Part header */}
-        <div style={{ background: `${CLR}0d`, border: `1px solid ${CLR}25`, borderRadius: 10, padding: "12px 16px", marginBottom: 12 }}>
+        <div style={{ background: CLR_BG, border: `1px solid ${CLR_BORDER}`, borderRadius: 12, padding: "12px 16px", marginBottom: 12 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 10, fontWeight: 800, color: CLR, background: `${CLR}22`, padding: "2px 8px", borderRadius: 5 }}>PART {part.partNum}</span>
-            <span style={{ fontSize: 14, fontWeight: 700, color: "#f0f4ff" }}>{part.title}</span>
-            <span style={{ fontSize: 11, color: "#8b9bbf", marginLeft: "auto" }}>Q {part.questionRange}</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: CLR, background: "rgba(0,113,227,0.15)", padding: "2px 8px", borderRadius: 6 }}>PART {part.partNum}</span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: "#1d1d1f" }}>{part.title}</span>
+            <span style={{ fontSize: 11, color: "#6e6e73", marginLeft: "auto" }}>Q {part.questionRange}</span>
           </div>
         </div>
 
         {/* Instruction */}
-        <div style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.1)", borderRadius: 8, padding: "10px 14px", marginBottom: 12 }}>
-          <p style={{ fontSize: 13, color: "#c8d4f0", lineHeight: 1.6 }}>{part.instruction}</p>
+        <div style={{ background: "#f5f5f7", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, padding: "10px 14px", marginBottom: 12 }}>
+          <p style={{ fontSize: 13, color: "#1d1d1f", lineHeight: 1.6, margin: 0 }}>{part.instruction}</p>
         </div>
 
         {/* Progress */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-          <div style={{ flex: 1, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.07)", overflow: "hidden" }}>
+          <div style={{ flex: 1, height: 4, borderRadius: 2, background: "rgba(0,0,0,0.07)", overflow: "hidden" }}>
             <div style={{ height: "100%", width: `${items.length > 0 ? (answered / items.length) * 100 : 0}%`, background: CLR, borderRadius: 2, transition: "width .3s" }} />
           </div>
-          <span style={{ fontSize: 11, color: "#8b9bbf", whiteSpace: "nowrap" }}>{answered}/{items.length}</span>
+          <span style={{ fontSize: 11, color: "#6e6e73", whiteSpace: "nowrap" }}>{answered}/{items.length}</span>
         </div>
 
         {/* ── GAP FILL ── */}
         {part.type === "gap_fill" && (
-          <div style={{ background: "#18243a", border: "0.5px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "18px 20px", marginBottom: 14 }}>
-            <div style={{ fontSize: 14, color: "#c8d4f0", lineHeight: 2.2 }}>
+          <div style={{ ...cardStyle }}>
+            <div style={{ fontSize: 14, color: "#1d1d1f", lineHeight: 2.2 }}>
               {part.passage.split(/\(([0-9]+)\)___/g).map((seg, i) => {
                 if (i % 2 === 0) return <span key={i}>{seg}</span>;
                 const gapNum = parseInt(seg);
                 const gapIdx = gapNum - 1;
                 return (
                   <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 4, margin: "0 2px", verticalAlign: "middle" }}>
-                    <span style={{ fontSize: 10, fontWeight: 800, color: CLR, background: `${CLR}20`, padding: "1px 5px", borderRadius: 4 }}>{gapNum}</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: CLR, background: CLR_BG, padding: "1px 5px", borderRadius: 4 }}>{gapNum}</span>
                     <input value={getAns(part.id, gapIdx)} onChange={e => setAns(part.id, gapIdx, e.target.value)}
-                      placeholder="..."
-                      style={{ width: 110, background: "rgba(55,138,221,0.07)", border: "none", borderBottom: `2px solid ${getAns(part.id, gapIdx) ? CLR : CLR + "55"}`, borderRadius: "4px 4px 0 0", padding: "2px 8px", color: "#f0f4ff", fontSize: 13, fontFamily: "inherit", outline: "none", textAlign: "center" }} />
+                      placeholder="..." style={inputStyle(getAns(part.id, gapIdx))} />
                   </span>
                 );
               })}
@@ -346,30 +356,29 @@ export default function Reading({ progress, scores, saveScore, addXP, clearSecti
         {/* ── MATCHING TEXT ── */}
         {part.type === "matching_text" && (
           <div>
-            <div style={{ background: "#0d1829", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: 14, marginBottom: 14 }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: "#8b9bbf", marginBottom: 10, textTransform: "uppercase" }}>Options</p>
+            <div style={{ background: "#f5f5f7", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: 14, marginBottom: 14 }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "#6e6e73", marginBottom: 10, textTransform: "uppercase" }}>Options</p>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(270px,1fr))", gap: 8 }}>
                 {part.options.map(o => (
-                  <div key={o.key} style={{ padding: "8px 10px", borderRadius: 7, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <div key={o.key} style={{ padding: "9px 12px", borderRadius: 10, background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)" }}>
                     <div style={{ display: "flex", gap: 6, alignItems: "flex-start" }}>
-                      <span style={{ fontSize: 11, fontWeight: 800, color: CLR, background: `${CLR}18`, padding: "1px 6px", borderRadius: 4, flexShrink: 0 }}>{o.key}</span>
-                      <div><p style={{ fontSize: 12, fontWeight: 700, color: "#e2e8f0", marginBottom: 2 }}>{o.name}</p><p style={{ fontSize: 11, color: "#64748b", lineHeight: 1.4 }}>{o.text}</p></div>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: CLR, background: CLR_BG, padding: "1px 6px", borderRadius: 4, flexShrink: 0 }}>{o.key}</span>
+                      <div><p style={{ fontSize: 12, fontWeight: 600, color: "#1d1d1f", marginBottom: 2 }}>{o.name}</p><p style={{ fontSize: 11, color: "#6e6e73", lineHeight: 1.4 }}>{o.text}</p></div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
             {part.questions.map((q, i) => (
-              <div key={i} style={{ background: "#18243a", border: "0.5px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: "14px 16px", marginBottom: 10, display: "flex", alignItems: "flex-start", gap: 12, flexWrap: "wrap" }}>
-                <span style={{ fontSize: 11, fontWeight: 800, color: CLR, background: `${CLR}18`, padding: "2px 7px", borderRadius: 4, flexShrink: 0, marginTop: 2 }}>{q.num}</span>
-                <p style={{ flex: 1, fontSize: 13, color: "#c8d4f0", lineHeight: 1.6, minWidth: 200 }}>{q.q}</p>
+              <div key={i} style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: "14px 16px", marginBottom: 10, display: "flex", alignItems: "flex-start", gap: 12, flexWrap: "wrap", boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: CLR, background: CLR_BG, padding: "2px 7px", borderRadius: 4, flexShrink: 0, marginTop: 2 }}>{q.num}</span>
+                <p style={{ flex: 1, fontSize: 13, color: "#1d1d1f", lineHeight: 1.6, minWidth: 200, margin: 0 }}>{q.q}</p>
                 <div style={{ position: "relative", flexShrink: 0 }}>
-                  <select value={getAns(part.id, i)} onChange={e => setAns(part.id, i, e.target.value)}
-                    style={{ background: "#0d1624", border: `1.5px solid ${getAns(part.id, i) ? CLR : "rgba(255,255,255,0.15)"}`, borderRadius: 9, padding: "8px 32px 8px 14px", color: getAns(part.id, i) ? "#f0f4ff" : "#8b9bbf", fontSize: 13, fontFamily: "inherit", cursor: "pointer", minWidth: 120, appearance: "none" }}>
+                  <select value={getAns(part.id, i)} onChange={e => setAns(part.id, i, e.target.value)} style={selectStyle(getAns(part.id, i))}>
                     <option value="">Select</option>
                     {part.options.map(o => <option key={o.key} value={o.key}>{o.key} — {o.name}</option>)}
                   </select>
-                  <I n="down" s={10} c="#8b9bbf" style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+                  <I n="down" s={10} c="#6e6e73" style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
                 </div>
               </div>
             ))}
@@ -379,26 +388,25 @@ export default function Reading({ progress, scores, saveScore, addXP, clearSecti
         {/* ── HEADING MATCH ── */}
         {part.type === "heading_match" && (
           <div>
-            <div style={{ background: "#0d1829", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: 14, marginBottom: 14 }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: "#8b9bbf", marginBottom: 8, textTransform: "uppercase" }}>List of Headings</p>
+            <div style={{ background: "#f5f5f7", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: 14, marginBottom: 14 }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "#6e6e73", marginBottom: 8, textTransform: "uppercase" }}>List of Headings</p>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 4 }}>
-                {part.headings.map(h => <div key={h.key} style={{ fontSize: 13, color: "#c8d4f0", padding: "3px 0" }}>{h.label}</div>)}
+                {part.headings.map(h => <div key={h.key} style={{ fontSize: 13, color: "#1d1d1f", padding: "3px 0" }}>{h.label}</div>)}
               </div>
             </div>
             {part.paragraphs.map((para, i) => (
-              <div key={i} style={{ background: "#18243a", border: "0.5px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: "14px 16px", marginBottom: 12 }}>
+              <div key={i} style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: "14px 16px", marginBottom: 12, boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
                 <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 8 }}>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: CLR, background: `${CLR}18`, padding: "2px 6px", borderRadius: 4, flexShrink: 0 }}>Q{para.num}</span>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: "#f0f4ff" }}>{para.label}</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: CLR, background: CLR_BG, padding: "2px 6px", borderRadius: 4, flexShrink: 0 }}>Q{para.num}</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: "#1d1d1f" }}>{para.label}</span>
                 </div>
-                <p style={{ fontSize: 12, color: "#8b9bbf", lineHeight: 1.65, marginBottom: 12 }}>{para.text.slice(0, 180)}...</p>
+                <p style={{ fontSize: 12, color: "#6e6e73", lineHeight: 1.65, marginBottom: 12, margin: "0 0 12px" }}>{para.text.slice(0, 180)}...</p>
                 <div style={{ position: "relative", display: "inline-block" }}>
-                  <select value={getAns(part.id, i)} onChange={e => setAns(part.id, i, e.target.value)}
-                    style={{ background: "#0d1624", border: `1.5px solid ${getAns(part.id, i) ? CLR : "rgba(255,255,255,0.15)"}`, borderRadius: 9, padding: "8px 32px 8px 14px", color: getAns(part.id, i) ? "#f0f4ff" : "#8b9bbf", fontSize: 13, fontFamily: "inherit", cursor: "pointer", minWidth: 200, appearance: "none" }}>
+                  <select value={getAns(part.id, i)} onChange={e => setAns(part.id, i, e.target.value)} style={{ ...selectStyle(getAns(part.id, i)), minWidth: 200 }}>
                     <option value="">Select heading...</option>
                     {part.headings.map(h => <option key={h.key} value={h.key}>{h.label}</option>)}
                   </select>
-                  <I n="down" s={10} c="#8b9bbf" />
+                  <I n="down" s={10} c="#6e6e73" />
                 </div>
               </div>
             ))}
@@ -408,24 +416,21 @@ export default function Reading({ progress, scores, saveScore, addXP, clearSecti
         {/* ── MCQ READING ── */}
         {part.type === "mcq_reading" && (
           <div>
-            <div style={{ background: "#18243a", border: "0.5px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 18px", marginBottom: 14, maxHeight: 360, overflowY: "auto", fontSize: 13, color: "#c8d4f0", lineHeight: 1.85 }}>
-              {part.passage.split("\n\n").map((p, i) => <p key={i} style={{ marginBottom: 10 }}>{p}</p>)}
+            <div style={passageStyle}>
+              {part.passage.split("\n\n").map((p, i) => <p key={i} style={{ marginBottom: 10, margin: "0 0 10px" }}>{p}</p>)}
             </div>
             {part.questions.map((q, i) => (
-              <div key={i} style={{ background: "#18243a", border: "0.5px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: "14px 16px", marginBottom: 10 }}>
+              <div key={i} style={{ ...cardStyle }}>
                 <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 10 }}>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: CLR, background: `${CLR}18`, padding: "2px 6px", borderRadius: 4, flexShrink: 0 }}>{q.num}</span>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: "#f0f4ff", lineHeight: 1.5 }}>{q.q}</p>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: CLR, background: CLR_BG, padding: "2px 6px", borderRadius: 4, flexShrink: 0 }}>{q.num}</span>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: "#1d1d1f", lineHeight: 1.5, margin: 0 }}>{q.q}</p>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {q.options.map((opt, j) => {
                     const sel = getAns(part.id, i) !== "" && Number(getAns(part.id, i)) === j;
                     return (
-                      <div key={j} onClick={() => setAns(part.id, i, j)}
-                        style={{ padding: "9px 14px", borderRadius: 9, cursor: "pointer", fontSize: 13, border: sel ? `2px solid ${CLR}` : "1px solid rgba(255,255,255,0.07)", background: sel ? `${CLR}15` : "rgba(255,255,255,0.01)", color: sel ? "#f0f4ff" : "#8b9bbf", transition: "all .12s", display: "flex", alignItems: "center", gap: 10 }}>
-                        <div style={{ width: 24, height: 24, borderRadius: "50%", flexShrink: 0, background: sel ? CLR : "rgba(255,255,255,0.06)", color: sel ? "#fff" : "#8b9bbf", fontWeight: 800, fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", border: sel ? "none" : "1px solid rgba(255,255,255,0.15)" }}>
-                          {String.fromCharCode(65 + j)}
-                        </div>
+                      <div key={j} onClick={() => setAns(part.id, i, j)} style={optionStyle(sel)}>
+                        <div style={circleStyle(sel)}>{String.fromCharCode(65 + j)}</div>
                         {opt}
                       </div>
                     );
@@ -439,18 +444,18 @@ export default function Reading({ progress, scores, saveScore, addXP, clearSecti
         {/* ── SENTENCE COMPLETION ── */}
         {part.type === "sentence_completion" && (
           <div>
-            <div style={{ background: "#18243a", border: "0.5px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 18px", marginBottom: 14, maxHeight: 340, overflowY: "auto", fontSize: 13, color: "#c8d4f0", lineHeight: 1.85 }}>
-              {part.passage && part.passage.split("\n\n").map((p, i) => <p key={i} style={{ marginBottom: 10 }}>{p}</p>)}
+            <div style={passageStyle}>
+              {part.passage && part.passage.split("\n\n").map((p, i) => <p key={i} style={{ marginBottom: 10, margin: "0 0 10px" }}>{p}</p>)}
             </div>
             {part.sentences.map((s, i) => (
-              <div key={i} style={{ background: "#18243a", border: "0.5px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: "14px 16px", marginBottom: 10 }}>
+              <div key={i} style={{ ...cardStyle }}>
                 <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 8 }}>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: CLR, background: `${CLR}18`, padding: "2px 6px", borderRadius: 4, flexShrink: 0 }}>{s.num || s.qNum || (i + 1)}</span>
-                  <p style={{ fontSize: 13, color: "#c8d4f0", lineHeight: 1.6, flex: 1 }}>{(s.text || s.question || "").replace("___", "________")}</p>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: CLR, background: CLR_BG, padding: "2px 6px", borderRadius: 4, flexShrink: 0 }}>{s.num || s.qNum || (i + 1)}</span>
+                  <p style={{ fontSize: 13, color: "#1d1d1f", lineHeight: 1.6, flex: 1, margin: 0 }}>{(s.text || s.question || "").replace("___", "________")}</p>
                 </div>
                 <input value={getAns(part.id, i)} onChange={e => setAns(part.id, i, e.target.value)}
                   placeholder="Type your answer (max 3 words from the passage)..."
-                  style={{ width: "100%", background: "#0f1a2e", border: `1.5px solid ${getAns(part.id, i) ? CLR : "rgba(255,255,255,0.1)"}`, borderRadius: 8, padding: "9px 14px", color: "#f0f4ff", fontSize: 13, fontFamily: "inherit", outline: "none", transition: "border-color .2s" }} />
+                  style={{ width: "100%", background: "#f5f5f7", border: `1.5px solid ${getAns(part.id, i) ? CLR : "rgba(0,0,0,0.10)"}`, borderRadius: 10, padding: "10px 14px", color: "#1d1d1f", fontSize: 13, fontFamily: "inherit", outline: "none", transition: "border-color .2s" }} />
               </div>
             ))}
           </div>
@@ -460,19 +465,17 @@ export default function Reading({ progress, scores, saveScore, addXP, clearSecti
         {(part.type === "short_answer" || part.type === "summary" || part.type === "multiple_choice") && (
           <div>
             {(part.passageTitle || part.passage) && (
-              <div style={{ background: "#18243a", border: "0.5px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 18px", marginBottom: 14, maxHeight: 360, overflowY: "auto", fontSize: 13, color: "#c8d4f0", lineHeight: 1.85 }}>
-                {part.passageTitle && <h4 style={{ fontSize: 15, fontWeight: 700, color: "#f0f4ff", marginBottom: 8 }}>{part.passageTitle}</h4>}
-                {part.passage && part.passage.split("\n\n").map((p, i) => <p key={i} style={{ marginBottom: 10 }}>{p}</p>)}
+              <div style={passageStyle}>
+                {part.passageTitle && <h4 style={{ fontSize: 15, fontWeight: 700, color: "#1d1d1f", marginBottom: 8 }}>{part.passageTitle}</h4>}
+                {part.passage && part.passage.split("\n\n").map((p, i) => <p key={i} style={{ marginBottom: 10, margin: "0 0 10px" }}>{p}</p>)}
               </div>
             )}
-
             {part.summaryText && (
-              <div style={{ background: "#0d1829", border: "1px solid rgba(55,138,221,0.2)", borderRadius: 10, padding: 14, marginBottom: 14, fontSize: 13, color: "#e2e8f0", lineHeight: 1.8 }}>
+              <div style={{ background: CLR_BG, border: `1px solid ${CLR_BORDER}`, borderRadius: 12, padding: 14, marginBottom: 14, fontSize: 13, color: "#1d1d1f", lineHeight: 1.8 }}>
                 <p style={{ fontSize: 11, fontWeight: 700, color: CLR, marginBottom: 6, textTransform: "uppercase" }}>Summary</p>
                 <div>{part.summaryText}</div>
               </div>
             )}
-
             {items.map((q, i) => {
               const qNum = q.qNum || q.num || (i + 1);
               const qText = q.question || q.q || (part.summaryText ? `Gap (${qNum})` : "");
@@ -485,24 +488,19 @@ export default function Reading({ progress, scores, saveScore, addXP, clearSecti
                   opts = rawOpt;
                 }
               }
-
               return (
-                <div key={i} style={{ background: "#18243a", border: "0.5px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: "14px 16px", marginBottom: 10 }}>
+                <div key={i} style={{ ...cardStyle }}>
                   <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 10 }}>
-                    <span style={{ fontSize: 11, fontWeight: 800, color: CLR, background: `${CLR}18`, padding: "2px 6px", borderRadius: 4, flexShrink: 0 }}>{qNum}</span>
-                    {qText && <p style={{ fontSize: 13, fontWeight: 600, color: "#f0f4ff", lineHeight: 1.5 }}>{qText}</p>}
+                    <span style={{ fontSize: 11, fontWeight: 700, color: CLR, background: CLR_BG, padding: "2px 6px", borderRadius: 4, flexShrink: 0 }}>{qNum}</span>
+                    {qText && <p style={{ fontSize: 13, fontWeight: 600, color: "#1d1d1f", lineHeight: 1.5, margin: 0 }}>{qText}</p>}
                   </div>
-
                   {opts && opts.length > 0 ? (
                     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                       {opts.map((opt, j) => {
                         const isSel = getAns(part.id, i) !== "" && Number(getAns(part.id, i)) === j;
                         return (
-                          <div key={j} onClick={() => setAns(part.id, i, j)}
-                            style={{ padding: "9px 14px", borderRadius: 9, cursor: "pointer", fontSize: 13, border: isSel ? `2px solid ${CLR}` : "1px solid rgba(255,255,255,0.07)", background: isSel ? `${CLR}15` : "rgba(255,255,255,0.01)", color: isSel ? "#f0f4ff" : "#8b9bbf", transition: "all .12s", display: "flex", alignItems: "center", gap: 10 }}>
-                            <div style={{ width: 24, height: 24, borderRadius: "50%", flexShrink: 0, background: isSel ? CLR : "rgba(255,255,255,0.06)", color: isSel ? "#fff" : "#8b9bbf", fontWeight: 800, fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", border: isSel ? "none" : "1px solid rgba(255,255,255,0.15)" }}>
-                              {String.fromCharCode(65 + j)}
-                            </div>
+                          <div key={j} onClick={() => setAns(part.id, i, j)} style={optionStyle(isSel)}>
+                            <div style={circleStyle(isSel)}>{String.fromCharCode(65 + j)}</div>
                             {opt}
                           </div>
                         );
@@ -511,7 +509,7 @@ export default function Reading({ progress, scores, saveScore, addXP, clearSecti
                   ) : (
                     <input value={getAns(part.id, i)} onChange={e => setAns(part.id, i, e.target.value)}
                       placeholder="Type your answer..."
-                      style={{ width: "100%", background: "#0f1a2e", border: `1.5px solid ${getAns(part.id, i) ? CLR : "rgba(255,255,255,0.1)"}`, borderRadius: 8, padding: "9px 14px", color: "#f0f4ff", fontSize: 13, fontFamily: "inherit", outline: "none" }} />
+                      style={{ width: "100%", background: "#f5f5f7", border: `1.5px solid ${getAns(part.id, i) ? CLR : "rgba(0,0,0,0.10)"}`, borderRadius: 10, padding: "10px 14px", color: "#1d1d1f", fontSize: 13, fontFamily: "inherit", outline: "none" }} />
                   )}
                 </div>
               );
@@ -523,36 +521,27 @@ export default function Reading({ progress, scores, saveScore, addXP, clearSecti
         {part.type === "true_false" && (
           <div>
             {part.passage && (
-              <div style={{ background: "#18243a", border: "0.5px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "16px 18px", marginBottom: 14, maxHeight: 360, overflowY: "auto", fontSize: 13, color: "#c8d4f0", lineHeight: 1.85 }}>
-                {part.passageTitle && <h4 style={{ fontSize: 15, fontWeight: 700, color: "#f0f4ff", marginBottom: 8 }}>{part.passageTitle}</h4>}
-                {part.passage.split("\n\n").map((p, i) => <p key={i} style={{ marginBottom: 10 }}>{p}</p>)}
+              <div style={passageStyle}>
+                {part.passageTitle && <h4 style={{ fontSize: 15, fontWeight: 700, color: "#1d1d1f", marginBottom: 8 }}>{part.passageTitle}</h4>}
+                {part.passage.split("\n\n").map((p, i) => <p key={i} style={{ marginBottom: 10, margin: "0 0 10px" }}>{p}</p>)}
               </div>
             )}
-
             {items.map((q, i) => {
               const qNum = q.qNum || q.num || (i + 1);
               const qText = q.question || q.q || "";
               const currentVal = String(getAns(part.id, i)).toUpperCase();
-
               return (
-                <div key={i} style={{ background: "#18243a", border: "0.5px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: "14px 16px", marginBottom: 10 }}>
+                <div key={i} style={{ ...cardStyle }}>
                   <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 10 }}>
-                    <span style={{ fontSize: 11, fontWeight: 800, color: CLR, background: `${CLR}18`, padding: "2px 6px", borderRadius: 4, flexShrink: 0 }}>{qNum}</span>
-                    <p style={{ fontSize: 13, fontWeight: 600, color: "#f0f4ff", lineHeight: 1.5 }}>{qText}</p>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: CLR, background: CLR_BG, padding: "2px 6px", borderRadius: 4, flexShrink: 0 }}>{qNum}</span>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: "#1d1d1f", lineHeight: 1.5, margin: 0 }}>{qText}</p>
                   </div>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     {["TRUE", "FALSE", "NOT GIVEN"].map((opt) => {
                       const isSel = currentVal === opt;
                       return (
                         <button key={opt} onClick={() => setAns(part.id, i, opt)}
-                          style={{
-                            flex: 1, minWidth: 90, padding: "8px 12px", borderRadius: 8,
-                            border: isSel ? `2px solid ${CLR}` : "1px solid rgba(255,255,255,0.1)",
-                            background: isSel ? `${CLR}22` : "rgba(255,255,255,0.02)",
-                            color: isSel ? "#f0f4ff" : "#8b9bbf",
-                            fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
-                            transition: "all .12s ease"
-                          }}>
+                          style={{ flex: 1, minWidth: 90, padding: "9px 12px", borderRadius: 10, border: isSel ? `2px solid ${CLR}` : "1.5px solid rgba(0,0,0,0.10)", background: isSel ? CLR_BG : "#f5f5f7", color: isSel ? CLR : "#6e6e73", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", transition: "all .12s ease" }}>
                           {opt}
                         </button>
                       );
@@ -568,39 +557,34 @@ export default function Reading({ progress, scores, saveScore, addXP, clearSecti
         {part.type === "matching_headings" && (
           <div>
             {part.sections && (
-              <div style={{ background: "#0d1829", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: 14, marginBottom: 14 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: "#8b9bbf", marginBottom: 10, textTransform: "uppercase" }}>Sections</p>
+              <div style={{ background: "#f5f5f7", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: 14, marginBottom: 14 }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: "#6e6e73", marginBottom: 10, textTransform: "uppercase" }}>Sections</p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {part.sections.map((sec, i) => (
-                    <div key={i} style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                      <p style={{ fontSize: 12, fontWeight: 800, color: CLR, marginBottom: 4 }}>{sec.heading}</p>
-                      <p style={{ fontSize: 12, color: "#c8d4f0", lineHeight: 1.6 }}>{sec.text}</p>
+                    <div key={i} style={{ padding: "10px 12px", borderRadius: 10, background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)" }}>
+                      <p style={{ fontSize: 12, fontWeight: 700, color: CLR, marginBottom: 4 }}>{sec.heading}</p>
+                      <p style={{ fontSize: 12, color: "#1d1d1f", lineHeight: 1.6, margin: 0 }}>{sec.text}</p>
                     </div>
                   ))}
                 </div>
               </div>
             )}
-
             {items.map((q, i) => {
               const qNum = q.qNum || q.num || (i + 1);
               const qText = q.question || q.q || "";
               const opts = q.options || [];
-
               return (
-                <div key={i} style={{ background: "#18243a", border: "0.5px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: "14px 16px", marginBottom: 10 }}>
+                <div key={i} style={{ ...cardStyle }}>
                   <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 10 }}>
-                    <span style={{ fontSize: 11, fontWeight: 800, color: CLR, background: `${CLR}18`, padding: "2px 6px", borderRadius: 4, flexShrink: 0 }}>{qNum}</span>
-                    <p style={{ fontSize: 13, fontWeight: 600, color: "#f0f4ff", lineHeight: 1.5 }}>{qText}</p>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: CLR, background: CLR_BG, padding: "2px 6px", borderRadius: 4, flexShrink: 0 }}>{qNum}</span>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: "#1d1d1f", lineHeight: 1.5, margin: 0 }}>{qText}</p>
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                     {opts.map((opt, j) => {
                       const isSel = getAns(part.id, i) !== "" && Number(getAns(part.id, i)) === j;
                       return (
-                        <div key={j} onClick={() => setAns(part.id, i, j)}
-                          style={{ padding: "9px 14px", borderRadius: 9, cursor: "pointer", fontSize: 13, border: isSel ? `2px solid ${CLR}` : "1px solid rgba(255,255,255,0.07)", background: isSel ? `${CLR}15` : "rgba(255,255,255,0.01)", color: isSel ? "#f0f4ff" : "#8b9bbf", transition: "all .12s", display: "flex", alignItems: "center", gap: 10 }}>
-                          <div style={{ width: 24, height: 24, borderRadius: "50%", flexShrink: 0, background: isSel ? CLR : "rgba(255,255,255,0.06)", color: isSel ? "#fff" : "#8b9bbf", fontWeight: 800, fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", border: isSel ? "none" : "1px solid rgba(255,255,255,0.15)" }}>
-                            {String.fromCharCode(65 + j)}
-                          </div>
+                        <div key={j} onClick={() => setAns(part.id, i, j)} style={optionStyle(isSel)}>
+                          <div style={circleStyle(isSel)}>{String.fromCharCode(65 + j)}</div>
                           {opt}
                         </div>
                       );
@@ -615,18 +599,18 @@ export default function Reading({ progress, scores, saveScore, addXP, clearSecti
         {/* Navigation */}
         <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
           <button onClick={() => setPIdx(p => Math.max(0, p - 1))} disabled={pIdx === 0}
-            style={{ padding: "11px 18px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.12)", background: "transparent", color: pIdx === 0 ? "#4a5568" : "#8b9bbf", fontSize: 13, cursor: pIdx === 0 ? "not-allowed" : "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 6 }}>
-            <I n="back" s={13} c={pIdx === 0 ? "#4a5568" : "#8b9bbf"} /> Prev
+            style={{ padding: "11px 18px", borderRadius: 12, border: "1.5px solid rgba(0,0,0,0.10)", background: "#ffffff", color: pIdx === 0 ? "#aeaeb2" : "#6e6e73", fontSize: 13, cursor: pIdx === 0 ? "not-allowed" : "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 6 }}>
+            <I n="back" s={13} c={pIdx === 0 ? "#aeaeb2" : "#6e6e73"} /> Prev
           </button>
           {!isLast ? (
             <button onClick={() => setPIdx(p => p + 1)}
-              style={{ flex: 1, padding: "11px", borderRadius: 10, border: "none", background: CLR, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+              style={{ flex: 1, padding: "11px", borderRadius: 12, border: "none", background: CLR, color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
               Next Part <I n="next" s={13} c="#fff" />
             </button>
           ) : (
             <button onClick={submit} disabled={checking}
-              style={{ flex: 1, padding: "11px", borderRadius: 10, border: "none", background: checking ? "#1e293b" : "#1D9E75", color: checking ? "#4a5568" : "#fff", fontSize: 13, fontWeight: 700, cursor: checking ? "not-allowed" : "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-              {checking ? <><span style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", animation: "spin .7s linear infinite", display: "inline-block" }} /> Grading...</> : "Submit Test"}
+              style={{ flex: 1, padding: "11px", borderRadius: 12, border: "none", background: checking ? "#f5f5f7" : "#34c759", color: checking ? "#aeaeb2" : "#fff", fontSize: 13, fontWeight: 600, cursor: checking ? "not-allowed" : "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+              {checking ? <><span style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid rgba(0,0,0,0.15)", borderTopColor: "#6e6e73", animation: "spin .7s linear infinite", display: "inline-block" }} /> Grading...</> : "Submit Test"}
             </button>
           )}
         </div>
@@ -640,62 +624,68 @@ export default function Reading({ progress, scores, saveScore, addXP, clearSecti
     return (
       <div style={{ animation: "fadeUp .4s ease", maxWidth: 720, margin: "0 auto" }}>
         <style>{`@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}`}</style>
+
         {/* Score */}
-        <div style={{ background: "linear-gradient(135deg,#0f1f35,#182d45)", border: `1px solid ${info.color}44`, borderRadius: 16, padding: "24px 20px", marginBottom: 14, textAlign: "center" }}>
-          <h2 style={{ fontSize: 14, color: "#8b9bbf", marginBottom: 12 }}>{sel.title}</h2>
-          <div style={{ display: "flex", justifyContent: "center", gap: 20, marginBottom: 12, flexWrap: "wrap" }}>
-            <div><div style={{ fontSize: 48, fontWeight: 800, color: info.color, lineHeight: 1 }}>{overall}</div><div style={{ fontSize: 11, color: "#8b9bbf" }}>out of {MAX}</div></div>
-            <div style={{ borderLeft: "1px solid rgba(255,255,255,.1)", paddingLeft: 20 }}><div style={{ fontSize: 36, fontWeight: 800, color: info.color, lineHeight: 1 }}>{info.band}</div><div style={{ fontSize: 11, color: "#8b9bbf" }}>Band</div></div>
-            <div style={{ borderLeft: "1px solid rgba(255,255,255,.1)", paddingLeft: 20 }}><div style={{ fontSize: 36, fontWeight: 800, color: info.color, lineHeight: 1 }}>{info.cefr}</div><div style={{ fontSize: 11, color: "#8b9bbf" }}>CEFR</div></div>
+        <div style={{ background: `linear-gradient(135deg,${info.color}10,${info.color}05)`, border: `1px solid ${info.color}30`, borderRadius: 20, padding: "28px 24px", marginBottom: 16, textAlign: "center", boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}>
+          <h2 style={{ fontSize: 13, color: "#6e6e73", marginBottom: 14, fontWeight: 500 }}>{sel.title}</h2>
+          <div style={{ display: "flex", justifyContent: "center", gap: 28, marginBottom: 14, flexWrap: "wrap" }}>
+            <div><div style={{ fontSize: 52, fontWeight: 700, color: info.color, lineHeight: 1, letterSpacing: "-2px" }}>{overall}</div><div style={{ fontSize: 11, color: "#6e6e73" }}>out of {MAX}</div></div>
+            <div style={{ borderLeft: "1px solid rgba(0,0,0,0.10)", paddingLeft: 28 }}><div style={{ fontSize: 40, fontWeight: 700, color: info.color, lineHeight: 1 }}>{info.band}</div><div style={{ fontSize: 11, color: "#6e6e73" }}>Band</div></div>
+            <div style={{ borderLeft: "1px solid rgba(0,0,0,0.10)", paddingLeft: 28 }}><div style={{ fontSize: 40, fontWeight: 700, color: info.color, lineHeight: 1 }}>{info.cefr}</div><div style={{ fontSize: 11, color: "#6e6e73" }}>CEFR</div></div>
           </div>
-          <div style={{ fontSize: 12, color: "#8b9bbf", marginBottom: 10 }}>{totalC}/{totalI} correct</div>
-          <div style={{ height: 8, borderRadius: 4, background: "rgba(255,255,255,.08)", overflow: "hidden" }}>
-            <div style={{ height: "100%", width: `${(overall / MAX) * 100}%`, background: info.color, borderRadius: 4, transition: "width 1s ease" }} />
+          <div style={{ fontSize: 13, color: "#6e6e73", marginBottom: 12 }}>{totalC}/{totalI} correct</div>
+          <div style={{ height: 6, borderRadius: 3, background: "rgba(0,0,0,0.07)", overflow: "hidden", maxWidth: 300, margin: "0 auto" }}>
+            <div style={{ height: "100%", width: `${(overall / MAX) * 100}%`, background: info.color, borderRadius: 3, transition: "width 1s ease" }} />
           </div>
         </div>
 
-        {feedback && <div style={{ background: "#18243a", border: "0.5px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: 14, marginBottom: 14 }}>
-          <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 6 }}><I n="star" s={13} c="#fbbf24" /><span style={{ fontSize: 11, fontWeight: 700, color: "#fbbf24", textTransform: "uppercase" }}>AI Feedback</span></div>
-          <p style={{ fontSize: 13, color: "#c8d4f0", lineHeight: 1.7 }}>{feedback}</p>
-        </div>}
+        {/* Feedback */}
+        {feedback && (
+          <div style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 16, padding: "18px 20px", marginBottom: 14, boxShadow: "0 1px 6px rgba(0,0,0,0.05)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+              <I n="star" s={15} c={CLR} />
+              <span style={{ fontSize: 14, fontWeight: 600, color: "#1d1d1f" }}>AI Feedback</span>
+            </div>
+            <p style={{ fontSize: 13, color: "#6e6e73", lineHeight: 1.7, margin: 0 }}>{feedback}</p>
+          </div>
+        )}
 
-        <p style={{ fontSize: 11, fontWeight: 700, color: "#8b9bbf", marginBottom: 10, textTransform: "uppercase" }}>Part Breakdown</p>
-        {pResults.map((r, ri) => {
-          const pct = r.total > 0 ? Math.round((r.correct / r.total) * 100) : 0;
-          return (
-            <div key={ri} style={{ background: "#18243a", border: "0.5px solid rgba(255,255,255,0.07)", borderRadius: 11, padding: "13px 16px", marginBottom: 10 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 10, fontWeight: 800, color: CLR, background: `${CLR}18`, padding: "2px 7px", borderRadius: 4 }}>P{ri + 1}</span>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: "#f0f4ff" }}>{r.title}</span>
-                </div>
-                <div><span style={{ fontSize: 14, fontWeight: 800, color: pct >= 60 ? "#1D9E75" : "#e11d48" }}>{r.correct}/{r.total}</span><span style={{ fontSize: 11, color: "#8b9bbf", marginLeft: 5 }}>({pct}%)</span></div>
-              </div>
-              <div style={{ height: 4, borderRadius: 2, background: "rgba(255,255,255,.07)", overflow: "hidden", marginBottom: 8 }}>
-                <div style={{ height: "100%", width: `${pct}%`, background: pct >= 60 ? "#1D9E75" : "#e11d48", borderRadius: 2 }} />
-              </div>
-              {r.qResults.map((qr, qi) => (
-                <div key={qi} style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "5px 0", borderBottom: qi < r.qResults.length - 1 ? "1px solid rgba(255,255,255,.04)" : "none" }}>
-                  <span style={{ flexShrink: 0, marginTop: 1 }}>{qr.isCorrect ? <I n="check" s={12} c="#1D9E75" /> : <I n="x" s={12} c="#e11d48" />}</span>
-                  <div style={{ flex: 1, fontSize: 11 }}>
-                    <span style={{ color: "#8b9bbf" }}>{qr.q?.slice(0, 55)}{qr.q?.length > 55 ? "..." : ""}</span>
-                    {!qr.isCorrect && <span style={{ color: "#f87171" }}> → You: <em>{qr.userAnswer}</em> · Correct: <strong style={{ color: "#5dcaa5" }}>{qr.correctAnswer}</strong></span>}
+        {/* Part breakdown */}
+        {pResults.map((pr) => (
+          <div key={pr.partId} style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 16, padding: "16px 20px", marginBottom: 12, boxShadow: "0 1px 6px rgba(0,0,0,0.05)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#1d1d1f" }}>{pr.title}</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: pr.correct === pr.total ? "#34c759" : CLR }}>{pr.correct}/{pr.total}</span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {pr.qResults.map((qr, i) => (
+                <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start", padding: "8px 12px", borderRadius: 10, background: qr.isCorrect ? "rgba(52,199,89,0.06)" : "rgba(255,59,48,0.06)", border: `1px solid ${qr.isCorrect ? "rgba(52,199,89,0.15)" : "rgba(255,59,48,0.12)"}` }}>
+                  <I n={qr.isCorrect ? "check" : "x"} s={14} c={qr.isCorrect ? "#34c759" : "#ff3b30"} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: "#1d1d1f", marginBottom: 2 }}>{qr.q}</div>
+                    <div style={{ fontSize: 11, color: "#6e6e73" }}>
+                      Your: <span style={{ color: qr.isCorrect ? "#34c759" : "#ff3b30", fontWeight: 600 }}>{qr.userAnswer}</span>
+                      {!qr.isCorrect && <> · Correct: <span style={{ color: "#34c759", fontWeight: 600 }}>{qr.correctAnswer}</span></>}
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
-          );
-        })}
+          </div>
+        ))}
 
         <div style={{ display: "flex", gap: 10 }}>
-          <button onClick={() => openTest(sel)} style={{ flex: 1, padding: "11px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.12)", background: "transparent", color: "#8b9bbf", fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>Try Again</button>
-          <button onClick={() => setView("list")} style={{ flex: 2, padding: "11px", borderRadius: 10, border: "none", background: CLR, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-            <I n="back" s={13} c="#fff" /> Back to Tests
+          <button onClick={() => { setView("list"); setResult(null); }}
+            style={{ flex: 1, padding: "14px", borderRadius: 14, border: "1.5px solid rgba(0,0,0,0.10)", background: "#ffffff", color: "#1d1d1f", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            ← Back to Tests
+          </button>
+          <button onClick={() => openTest(sel)}
+            style={{ flex: 1, padding: "14px", borderRadius: 14, border: "none", background: CLR, color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", boxShadow: `0 4px 16px rgba(0,113,227,0.25)` }}>
+            Try Again
           </button>
         </div>
       </div>
     );
   }
-
   return null;
 }
